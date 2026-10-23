@@ -13,6 +13,7 @@ HOME_SRC = '/app/memory/idcap/home_source.html'
 STYLE = '''
 <style>
 a[href="#"]{cursor:default}
+.footer__copyright,.footer__copyright p,.footer__copyright a{color:#c9d8ff!important}
 @media (min-width:992px) and (max-width:1199px){.site__header .container-fluid{padding:0 16px!important}.site__header .header__logo img{height:52px!important}.site__header .header__menu{padding:0 10px!important}.site__header .header__menu>ul{gap:14px!important}.site__header .header__menu>ul>li>a{font-size:12px!important}.site__header .header__panel .default__btn{font-size:12px!important;padding-left:14px!important;padding-right:14px!important;white-space:nowrap}}
 .menu-on .header__toggle{opacity:1!important;visibility:visible!important}
 .menu-on .header__toggle .toggle__content{margin:0!important}

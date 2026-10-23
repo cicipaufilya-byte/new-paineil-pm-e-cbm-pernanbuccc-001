@@ -1,0 +1,59 @@
+html body #seduc-header-host{position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:9990!important}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html body:not(#vn_a):not(#vn_b):not(#vn_c),
+html body:not(#vn_a):not(#vn_b):not(#vn_c) input,
+html body:not(#vn_a):not(#vn_b):not(#vn_c) select,
+html body:not(#vn_a):not(#vn_b):not(#vn_c) textarea,
+html body:not(#vn_a):not(#vn_b):not(#vn_c) button,
+html body:not(#vn_a):not(#vn_b):not(#vn_c) .blocoPadrao,
+html body:not(#vn_a):not(#vn_b):not(#vn_c) .blocoPadrao *:not(i):not([class*=uil]),
+html body:not(#vn_a):not(#vn_b):not(#vn_c) .wrap,
+html body:not(#vn_a):not(#vn_b):not(#vn_c) .wrap *:not(i){font-family:"Silka",Arial,sans-serif!important}
+html body:not(#vn_a):not(#vn_b):not(#vn_c) h2.tituloPagina,
+html body:not(#vn_a):not(#vn_b):not(#vn_c) h2.tituloPagina span,
+html body:not(#vn_a):not(#vn_b):not(#vn_c) .blocoPadrao h1,
+html body:not(#vn_a):not(#vn_b):not(#vn_c) .wrap h1.t{color:#1b3c82!important;font-weight:600!important}
+html body:not(#vn_a):not(#vn_b):not(#vn_c) .blocoPadrao .dados > label.description:not(.decl-veracidade){color:#1b3c82!important}
+html body:not(#vn_a):not(#vn_b):not(#vn_c) .aocp-edital-card .aec-head h3,
+html body:not(#vn_a):not(#vn_b):not(#vn_c) .wrap .card .edhead h3{font-family:"Silka",Arial,sans-serif!important;color:#0a1e3e!important}
+html body:not(#vn_a):not(#vn_b):not(#vn_c) .vn-sub::after{background:#3576fb!important}
+html body:not(#vn_a):not(#vn_b):not(#vn_c) #btn-salvar,
+html body:not(#vn_a):not(#vn_b):not(#vn_c) #btn-confirmar,
+html body:not(#vn_a):not(#vn_b):not(#vn_c) #btn-pagar,
+html body:not(#vn_a):not(#vn_b):not(#vn_c) #conf-success-ok,
+html body:not(#vn_a):not(#vn_b):not(#vn_c) #p-btn-copy,
+html body:not(#vn_a):not(#vn_b):not(#vn_c) .busca button{background:#3576fb!important;border:2px solid #3576fb!important;color:#fff!important;border-radius:999px!important;font-weight:600!important;letter-spacing:.3px!important;-webkit-appearance:none;appearance:none;transition:background-color .15s,opacity .15s}
+html body:not(#vn_a):not(#vn_b):not(#vn_c) #btn-salvar:hover,
+html body:not(#vn_a):not(#vn_b):not(#vn_c) #btn-confirmar:hover,
+html body:not(#vn_a):not(#vn_b):not(#vn_c) #btn-pagar:hover,
+html body:not(#vn_a):not(#vn_b):not(#vn_c) #conf-success-ok:hover,
+html body:not(#vn_a):not(#vn_b):not(#vn_c) #p-btn-copy:hover,
+html body:not(#vn_a):not(#vn_b):not(#vn_c) .busca button:hover{background:#1f5ad6!important;border-color:#1f5ad6!important}
+html body:not(#vn_a):not(#vn_b):not(#vn_c) #btn-salvar[disabled],
+html body:not(#vn_a):not(#vn_b):not(#vn_c) #btn-salvar:disabled{background:#3576fb!important;border-color:#3576fb!important;opacity:.45!important}
+html body:not(#vn_a):not(#vn_b):not(#vn_c) #btn-alterar,
+html body:not(#vn_a):not(#vn_b):not(#vn_c) #p-btn-voltar,
+html body:not(#vn_a):not(#vn_b):not(#vn_c) #p-btn-print,
+html body:not(#vn_a):not(#vn_b):not(#vn_c) .wrap a.back{border-radius:999px!important;background:#fff!important;border:2px solid #3576fb!important;color:#3576fb!important;font-weight:600!important}
+html body:not(#vn_a):not(#vn_b):not(#vn_c) .wrap .insc .num{color:#1b3c82!important}
+html body:not(#vn_a):not(#vn_b):not(#vn_c) input:focus,
+html body:not(#vn_a):not(#vn_b):not(#vn_c) select:focus,
+html body:not(#vn_a):not(#vn_b):not(#vn_c) textarea:focus{border-color:#3576fb!important;box-shadow:0 0 0 3px rgba(53,118,251,.18)!important;outline:0!important}
+@media (max-width:767px){
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=submit]),
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) select,
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) textarea{font-size:16px!important;min-height:46px}
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) #btn-salvar,
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) #btn-confirmar,
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) #btn-pagar,
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) #btn-alterar,
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) #p-btn-copy,
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) #p-btn-print,
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) #p-btn-voltar{min-height:50px!important;font-size:16px!important}
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) .aocp-edital-card .aec-head h3,
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) .wrap .card .edhead h3{font-size:24px!important}
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) .vn-sub{font-size:17px!important}
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) h2.tituloPagina,
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) h2.tituloPagina span,
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) .wrap h1.t{font-size:22px!important}
+}
