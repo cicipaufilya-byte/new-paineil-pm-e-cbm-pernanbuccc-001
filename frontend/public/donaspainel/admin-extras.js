@@ -861,7 +861,9 @@
       + '.dp-date-wrap button{border:1px solid #ddd6ee;background:#fff;color:#4b4463;border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:background-color .15s,color .15s}'
       + '.dp-date-wrap button:hover{background:#f3efff;color:#6d28d9}'
       + '.dp-date-wrap button.on{background:#7c3aed;border-color:#7c3aed;color:#fff}'
-      + '.dp-toolbar{flex-wrap:wrap}';
+      + '.dp-toolbar{flex-wrap:wrap}'
+      + '.dp-toolbar .dp-search-wrap:has([data-testid=search-inscricoes]){display:none!important}'
+      + '.dp-toolbar .dp-date-wrap{flex:1 1 auto}';
     document.head.appendChild(st);
   }
   function ymd(d) { var z = function (n) { return (n < 10 ? '0' : '') + n; }; return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()); }
@@ -881,6 +883,7 @@
     if (!search) return;
     var bar = search.closest('.dp-toolbar');
     if (!bar || bar.querySelector('.dp-date-wrap')) return;
+    var sw = search.closest('.dp-search-wrap'); if (sw) sw.style.display = 'none';
     var w = document.createElement('div');
     w.className = 'dp-date-wrap';
     w.setAttribute('data-testid', 'filter-date');
@@ -892,7 +895,7 @@
       + '<button type="button" data-k="ontem" data-testid="filter-date-ontem">Ontem</button>'
       + '<button type="button" data-k="7d" data-testid="filter-date-7d">7 dias</button>'
       + '<button type="button" data-k="limpar" data-testid="filter-date-limpar">Todas</button>';
-    bar.appendChild(w);
+    if (sw && sw.parentNode === bar) bar.insertBefore(w, sw.nextSibling); else bar.appendChild(w);
     var f = w.querySelector('#dp-date-from'), t = w.querySelector('#dp-date-to');
     f.value = window.__dpDate.from; t.value = window.__dpDate.to;
     f.addEventListener('change', function () { apply(f.value, t.value, w); });
