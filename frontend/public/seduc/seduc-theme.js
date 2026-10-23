@@ -1,15 +1,15 @@
 (function(){
-var V='18';
+var V='30';
 function fontsLink(){
  if(document.getElementById('ceb-fonts'))return;
- var l=document.createElement('link');l.id='ceb-fonts';l.rel='stylesheet';l.href='/cebraspe/fonts.css?v='+V;document.head.appendChild(l);
+ var l=document.createElement('link');l.id='ceb-fonts';l.rel='stylesheet';l.href='/idcap/fonts.css?v='+V;document.head.appendChild(l);
 }
 function host(id,html,cls,atTop){
  var h=document.createElement('div');h.id=id;
  h.style.cssText='display:block;width:100%;position:relative;z-index:'+(atTop?'9999':'100')+';visibility:hidden;';
  if(atTop)document.body.insertBefore(h,document.body.firstChild);else document.body.appendChild(h);
  var r=h.attachShadow({mode:'open'});
- r.innerHTML='<link rel="stylesheet" href="/cebraspe/chrome.css?v='+V+'"><div class="sfbody '+cls+'">'+html+'</div>';
+ r.innerHTML='<link rel="stylesheet" href="/idcap/chrome.css?v='+V+'"><div class="sfbody '+cls+'">'+html+'</div>';
  var ln=r.querySelector('link');
  function show(){h.style.visibility='visible';if(atTop)document.documentElement.classList.remove('vn-wait');}
  ln.addEventListener('load',show);
@@ -24,6 +24,8 @@ function host(id,html,cls,atTop){
  return r;
 }
 function menu(r){
+ var ib=r.getElementById('idcap-menu-btn');
+ if(ib){var w=r.querySelector('.sfbody'),tg=r.querySelector('.header__toggle');function st(on){w.classList.toggle('menu-on',on);document.documentElement.style.overflow=on?'hidden':'';}ib.addEventListener('click',function(){st(!w.classList.contains('menu-on'));});if(tg)tg.addEventListener('click',function(e){if(e.target===tg)st(false);});document.addEventListener('keydown',function(e){if(e.key==='Escape')st(false);});return;}
  var wrap=r.querySelector('.sfbody'),dr=r.getElementById('mnav'),op=r.getElementById('mnav-open');
  if(!wrap||!dr||!op)return;
  // drawer fora do .sfbody (que recebe transform:scale em telas HiDPI e prenderia o position:fixed)
@@ -52,7 +54,7 @@ function build(p){
  if(/minhas-inscricoes/.test(location.pathname)){hr.querySelectorAll('.header__action-follow-button,[data-testid=header-minhas-inscricoes-btn]').forEach(function(el){el.remove();});}
  menu(hr);
  if(/minhas-inscricoes/.test(location.pathname)){
-  hr.querySelectorAll('#mnav-open,.mnav-layer').forEach(function(el){el.remove();});
+  hr.querySelectorAll('#mnav-open,.mnav-layer,#idcap-menu-btn').forEach(function(el){el.remove();});
   hr.querySelectorAll('a').forEach(function(a){a.removeAttribute('href');a.style.cursor='default';});
   hr.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();},true);
  }
@@ -60,7 +62,7 @@ function build(p){
  host('vunesp-footer-host',p.f,p.cls,false);
 }
 function go(){
- fetch('/cebraspe/parts.json?v='+V).then(function(r){return r.json();}).then(build).catch(function(){document.documentElement.classList.remove('vn-wait');});
+ fetch('/idcap/parts.json?v='+V).then(function(r){return r.json();}).then(build).catch(function(){document.documentElement.classList.remove('vn-wait');});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go);else go();
 })();

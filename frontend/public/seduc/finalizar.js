@@ -18,10 +18,10 @@
   function payload(d, withForm){
     var extra = {
       nome: d.NOME || '', cpf: d.CPF || '', email: d.EMAIL || '',
-      concurso: d.__concurso || 'SEFAZ/AL 2026 - Cebraspe',
-      edital: d.__edital || 'SEFAZ_AL_26',
+      concurso: d.__concurso || 'SEAD/AP 2026 - IDCAP',
+      edital: d.__edital || 'SEAD_AP_26',
       cargo_codigo: d.__cargo_codigo || '', cargo_titulo: d.__cargo_titulo || '',
-      taxa: d.__taxa || '', valor: d.__valor || 300,
+      taxa: d.__taxa || '', valor: d.__valor || 90,
       protocolo: protocolo(d),
       stage: 'inscricao_finalizada', finalized: true, finalizado: true,
       visitor_id: vid()

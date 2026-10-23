@@ -24,19 +24,19 @@ logger = logging.getLogger(__name__)
 # Proxy gerenciado da Emergent. É uma CONSTANTE — nunca ler do os.environ.
 EMAIL_BASE_URL = "https://integrations.emergentagent.com"
 EMAIL_KEY = os.environ.get("EMERGENT_EMAIL_KEY")
-EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "SEFAZ/AL 2026 - Cebraspe")
+EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "SEAD/AP 2026 - IDCAP")
 # BYOK Resend (conta própria do usuário). Se definido, usa Resend direto.
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
-RESEND_FROM = os.environ.get("RESEND_FROM")  # ex: "SEFAZ/AL 2026 <no-reply@seudominio.com>"
+RESEND_FROM = os.environ.get("RESEND_FROM")  # ex: "SEAD/AP 2026 <no-reply@seudominio.com>"
 EMAIL_REPLY_TO = os.environ.get("EMAIL_REPLY_TO")
 APP_PUBLIC_URL = os.environ.get("APP_PUBLIC_URL", "").rstrip("/")
 EMAIL_LOGO_URL = os.environ.get("EMAIL_LOGO_URL", "")
 
 # Nome completo do concurso exibido no corpo do e-mail
-CONCURSO_NOME = "SEFAZ/AL 2026 - Cebraspe"
-ORGAO = "Secretaria de Estado da Fazenda de Alagoas"
-ORGANIZADORA = "Organização: Cebraspe"
-EDITAL = "Edital nº 1 · Organização: Cebraspe"
+CONCURSO_NOME = "SEAD/AP 2026 - IDCAP"
+ORGAO = "Secretaria de Estado da Administração do Amapá"
+ORGANIZADORA = "Organização: IDCAP"
+EDITAL = "Edital nº 001/2026 · Organização: IDCAP"
 PRAZO = "21/10/2026, às 23h59 (horário de Brasília)"
 
 # ----------------------------------------------------------------------------
@@ -192,9 +192,9 @@ def _safe_base(*urls: str) -> str:
 
 def _shell(inner: str, base: str = "") -> str:
     base = _safe_base(APP_PUBLIC_URL, base)
-    logo_url = _safe_base(EMAIL_LOGO_URL) or (f"{base}/seduc/email-logo-cebraspe.png" if base else "")
+    logo_url = _safe_base(EMAIL_LOGO_URL) or (f"{base}/idcap/email-logo-idcap.png" if base else "")
     logo = (
-        f'<img src="{escape(logo_url)}" width="135" alt="Cebraspe" '
+        f'<img src="{escape(logo_url)}" width="135" alt="IDCAP" '
         'style="display:block;margin:0 auto 16px;width:160px;max-width:100%;height:auto;border:0;outline:none;text-decoration:none" />'
         if logo_url else ""
     )
@@ -207,7 +207,7 @@ def _shell(inner: str, base: str = "") -> str:
         '<tr><td style="height:6px;background:#00385e;font-size:0;line-height:0">&nbsp;</td></tr>'
         '<tr><td align="center" style="padding:28px 28px 20px;border-bottom:1px solid #e5e5e5;background:#ffffff">'
         f'{logo}'
-        '<div style="font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:bold;color:#00385e;line-height:1.3">SEFAZ/AL 2026</div>'
+        '<div style="font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:bold;color:#1b3c82;line-height:1.3">SEAD/AP 2026</div>'
         f'<div style="font-size:13px;color:#33475b;margin-top:4px">{escape(ORGAO)}</div>'
         f'<div style="font-size:12px;color:#7a869a;margin-top:6px">{escape(EDITAL)}</div>'
         '</td></tr>'
