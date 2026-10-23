@@ -107,7 +107,7 @@
  
  </div>
  
- <a href=/termos.html id=btn-inscreva-se class="information__btn js-inscricao" data-testid=home-fazer-inscricao-btn><span>Inscrição Online</span></a>
+ <a href=/termos.html?c=assistente id=btn-inscreva-se class=information__btn data-testid=home-fazer-inscricao-btn><span>Inscrição Online</span></a>
  
  
  </div>
@@ -363,7 +363,7 @@ a[href="#"]{cursor:default}
   function setMenu(on){ root.classList.toggle('menu-on', on); }
   function go(url){ setMenu(false); loader.classList.add('on'); setTimeout(function(){ window.location.href = url; }, 1200); }
   function bind(sel, url){ document.querySelectorAll(sel).forEach(function(a){ a.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); go(url || a.getAttribute('href')); }); }); }
-  bind('#btn-inscreva-se, .js-inscricao', '/termos.html');
+  bind('#btn-inscreva-se');
   bind('a.home-menu-link', '/');
   bind('a.js-nav');
   bind('a[href="/minhas-inscricoes.html"]', '/minhas-inscricoes.html');

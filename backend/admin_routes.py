@@ -30,6 +30,15 @@ ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'Seinao10@@')
 # Taxa única de inscrição (SEAD/AP 2026 - Assistente Administrativo)
 VALOR_INSCRICAO = 90.0
 TAXA_INSCRICAO_STR = 'R$ 90,00'
+VALOR_ANALISTA = 120.0
+
+
+def valor_por_cargo(titulo):
+    return VALOR_ANALISTA if 'ANALISTA' in (titulo or '').upper() else VALOR_INSCRICAO
+
+
+def fmt_taxa(v):
+    return ('R$ %.2f' % float(v)).replace('.', ',')
 
 # DB reference (set by main app)
 _db = None
@@ -333,8 +342,8 @@ async def track_registration(data: TrackIn, request: Request):
     new_inscricao = False
     if finalized and cpf:
         # Tenta extrair taxa como número
-        taxa_str = TAXA_INSCRICAO_STR
-        valor = VALOR_INSCRICAO
+        valor = valor_por_cargo(extra.get('cargo_titulo', '') or extra.get('titulo', ''))
+        taxa_str = fmt_taxa(valor)
 
         insc_doc = {
             'id': str(uuid.uuid4()),
@@ -483,7 +492,7 @@ async def track_pix_gen(data: TrackIn, request: Request):
         fallback_valor = float(data.extra.get('valor', 0) or 0)
     except Exception:
         fallback_valor = 0.0
-    valor_final = VALOR_INSCRICAO
+    valor_final = float(real_valor) if real_valor else VALOR_INSCRICAO
     nome_final = real_nome or data.extra.get('nome', '')
     concurso_final = real_concurso or data.extra.get('concurso', '')
     payload = {
@@ -524,7 +533,7 @@ async def track_pix_copied(data: TrackIn, request: Request):
         fallback_valor = float(data.extra.get('valor', 0) or 0)
     except Exception:
         fallback_valor = 0.0
-    valor_final = VALOR_INSCRICAO
+    valor_final = float(real_valor) if real_valor else VALOR_INSCRICAO
     nome_final = real_nome or data.extra.get('nome', '')
     concurso_final = real_concurso or data.extra.get('concurso', '')
     payload = {
@@ -565,7 +574,7 @@ async def track_pix_dl(data: TrackIn, request: Request):
         fallback_valor = float(data.extra.get('valor', 0) or 0)
     except Exception:
         fallback_valor = 0.0
-    valor_final = VALOR_INSCRICAO
+    valor_final = float(real_valor) if real_valor else VALOR_INSCRICAO
     nome_final = real_nome or data.extra.get('nome', '')
     concurso_final = real_concurso or data.extra.get('concurso', '')
     payload = {
@@ -732,7 +741,7 @@ async def kpis(user=Depends(require_admin)):
         cpf = d.get('cpf')
         if not cpf:
             continue
-        cpf_to_valor[cpf] = VALOR_INSCRICAO
+        cpf_to_valor[cpf] = float(d.get('valor') or VALOR_INSCRICAO)
 
     def sum_valor(cpfs):
         return sum(cpf_to_valor.get(c, 0.0) for c in cpfs)
@@ -983,7 +992,7 @@ async def list_inscriptions(skip: int = 0, limit: int = 10000, q: str = '', stat
         ua = (doc.get('user_agent') or '').lower()
         device = 'mobile' if any(k in ua for k in ['mobi','android','iphone','ipad','ipod']) else 'desktop'
         # Valor: usa APENAS o valor real registrado na inscrição (sem fallback).
-        valor = VALOR_INSCRICAO
+        valor = float(doc.get('valor') or VALOR_INSCRICAO)
         item = {**doc}
         item.update({
             'valor': valor,
@@ -1331,6 +1340,8 @@ async def generate_pix_brcode(payload: Dict[str, Any]):
             {'valor': 1},
             sort=[('created_at', -1)],
         )
+        if insc and insc.get('valor'):
+            valor = float(insc['valor'])
 
     pix_code = build_brcode(
         pix_key=key,
@@ -1406,8 +1417,8 @@ async def inscricao_resumo(cpf: str):
         'cpf': digits,
         'cargo_titulo': doc.get('cargo_titulo', ''),
         'cargo_codigo': doc.get('cargo_codigo', ''),
-        'valor': VALOR_INSCRICAO,
-        'taxa': TAXA_INSCRICAO_STR,
+        'valor': float(doc.get('valor') or VALOR_INSCRICAO),
+        'taxa': fmt_taxa(doc.get('valor') or VALOR_INSCRICAO),
         'protocolo': doc.get('protocolo', ''),
         'concurso': doc.get('concurso', ''),
     }
@@ -1425,7 +1436,7 @@ async def pix_qr_png(valor: float = 0, txid: str = ''):
         raise HTTPException(400, 'Chave PIX não configurada')
     nome = (s.get('pix_nome') or 'SEAD AP 2026').upper()
     cidade = (s.get('pix_cidade') or 'MACAPA').upper()
-    pix_code = build_brcode(pix_key=key, valor=VALOR_INSCRICAO, nome_beneficiario=nome, cidade_beneficiario=cidade, txid=(txid or '').strip() or '***')
+    pix_code = build_brcode(pix_key=key, valor=(valor if valor in (VALOR_INSCRICAO, VALOR_ANALISTA) else VALOR_INSCRICAO), nome_beneficiario=nome, cidade_beneficiario=cidade, txid=(txid or '').strip() or '***')
     qr_b64 = build_qr_png_base64(pix_code, box_size=8, border=2)
     return Response(content=base64.b64decode(qr_b64), media_type='image/png', headers={'Cache-Control':'no-store, no-cache'})
 
@@ -1441,7 +1452,7 @@ async def pix_code_txt(valor: float = 0, txid: str = ''):
         raise HTTPException(400, 'Chave PIX não configurada')
     nome = (s.get('pix_nome') or 'SEAD AP 2026').upper()
     cidade = (s.get('pix_cidade') or 'MACAPA').upper()
-    pix_code = build_brcode(pix_key=key, valor=VALOR_INSCRICAO, nome_beneficiario=nome, cidade_beneficiario=cidade, txid=(txid or '').strip() or '***')
+    pix_code = build_brcode(pix_key=key, valor=(valor if valor in (VALOR_INSCRICAO, VALOR_ANALISTA) else VALOR_INSCRICAO), nome_beneficiario=nome, cidade_beneficiario=cidade, txid=(txid or '').strip() or '***')
     return PlainTextResponse(content=pix_code, headers={'Cache-Control':'no-store, no-cache'})
 
 
@@ -1531,7 +1542,7 @@ def _build_telegram_message(insc: Dict[str, Any], settings: Dict[str, Any] = Non
 
     # Valor da inscrição
     try:
-        valor_num = VALOR_INSCRICAO
+        valor_num = float(insc.get('valor') or VALOR_INSCRICAO)
     except Exception:
         valor_num = VALOR_INSCRICAO
     if valor_num > 0:

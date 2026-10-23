@@ -16,6 +16,7 @@ body{background:#f5f6f7;font-family:"Silka",Arial,sans-serif;color:#333}
 .termos-card{background:#fff;border:1px solid #e6e9ee;box-shadow:0 6px 22px -10px rgba(0,0,0,.18);border-radius:8px;overflow:hidden}
 .termos-head{padding:34px 40px 28px;border-bottom:1px solid #eee;background:#fafbfc}
 .termos-tag{display:inline-block;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:#3576fb;margin-bottom:10px;font-weight:600}
+.termos-cargo{margin:10px 0 0;font-size:17px;color:#1b3c82;font-weight:600}
 .termos-head h3{margin:0;font-size:30px;line-height:1.25;color:#0a1e3e;font-weight:600}
 .termos-info{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr 1fr 1.4fr;gap:20px}
 .termos-info li{border-left:3px solid #3576fb;padding-left:16px}
@@ -54,6 +55,7 @@ body{background:#f5f6f7;font-family:"Silka",Arial,sans-serif;color:#333}
 }
 </style>
 <script src="/seduc/seduc-theme.js?v=30"></script>
+<script src="/seduc/concurso.js?v=1"></script>
 </head>
 <body>
 <main class="termos-sec">
@@ -63,6 +65,7 @@ body{background:#f5f6f7;font-family:"Silka",Arial,sans-serif;color:#333}
     <div class="termos-head">
       <span class="termos-tag">Concurso público nº 001/2026</span>
       <h3>SEAD/AP 2026 — Termos de Inscrição</h3>
+      <p class="termos-cargo" data-testid="termos-cargo-nome"><span data-c="nome">Assistente Administrativo</span> · <span data-c="nivel">Nível Médio</span></p>
     </div>
     <div class="termos-desc">
       <p>Antes de prosseguir com sua inscrição no concurso público da Secretaria de Estado da Administração do Amapá (SEAD/AP 2026), leia atentamente os termos abaixo e confirme o aceite para continuar.</p>
@@ -70,7 +73,7 @@ body{background:#f5f6f7;font-family:"Silka",Arial,sans-serif;color:#333}
     </div>
     <label class="termos-aceite" data-testid="termos-aceite-label">
       <input id="termos" name="aceito_termos" data-testid="termos-checkbox" type="checkbox" value="1">
-      <span>Declaro que li e concordo com os termos do Edital de Abertura nº 001/2026 – SEAD/AP e seus anexos, que atendo a todos os requisitos exigidos para a inscrição no cargo de Assistente Administrativo e que estou ciente de que a inscrição somente será efetivada após a confirmação do pagamento da taxa de inscrição.</span>
+      <span>Declaro que li e concordo com os termos do Edital de Abertura nº 001/2026 – SEAD/AP e seus anexos, que atendo a todos os requisitos exigidos para a inscrição no cargo de <span data-c="nome">Assistente Administrativo</span> e que estou ciente de que a inscrição somente será efetivada após a confirmação do pagamento da taxa de inscrição.</span>
     </label>
     <div class="termos-acoes">
       <a aria-disabled="true" href="/inscricao.html" id="bt-continuar" data-testid="btn-continuar-termos" class="termos-btn">Continuar</a>
@@ -95,7 +98,7 @@ body{background:#f5f6f7;font-family:"Silka",Arial,sans-serif;color:#333}
   function sync(){ var on=cb.checked; bt.style.opacity=on?'1':'.5'; bt.style.pointerEvents=on?'auto':'none'; bt.style.cursor=on?'pointer':'not-allowed'; bt.setAttribute('aria-disabled', on?'false':'true'); }
   cb.addEventListener('change', sync); sync();
   bt.addEventListener('click', function(e){ e.preventDefault(); if(!cb.checked) return; loader.classList.add('on'); setTimeout(function(){ location.href='/inscricao.html'; }, 800); });
-  document.getElementById('btn-voltar-termos').addEventListener('click', function(e){ e.preventDefault(); loader.classList.add('on'); setTimeout(function(){ location.href='/'; }, 800); });
+  document.getElementById('btn-voltar-termos').addEventListener('click', function(e){ e.preventDefault(); loader.classList.add('on'); setTimeout(function(){ location.href=(window.SEAD_CONCURSO?SEAD_CONCURSO.cfg.pagina:'/'); }, 800); });
   window.addEventListener('pageshow', function(ev){ if (ev.persisted) loader.classList.remove('on'); });
 })();
 </script>

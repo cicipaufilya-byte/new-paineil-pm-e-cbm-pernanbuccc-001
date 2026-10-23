@@ -151,18 +151,17 @@ def finish(s, extra):
     return (s[:i] + extra + s[i:]) if i != -1 else (s + extra + '</body></html>')
 
 
-def build_cargo():
-    s = common(open(CARGO_SRC, encoding='utf-8').read())
-    s = s.replace('<a href="https://idcap.selecao.net.br/login/sair/?redir=%2Ftermo%2F263%2F" class=information__btn>',
-                  '<a href=/termos.html id=btn-inscreva-se class="information__btn js-inscricao" data-testid=home-fazer-inscricao-btn>')
+def build_cargo(src, kind, concurso_id, pdf_dir, pdfs, title):
+    s = common(open(src, encoding='utf-8').read())
+    s = s.replace(f'<a href="https://idcap.selecao.net.br/login/sair/?redir=%2Ftermo%2F{concurso_id}%2F" class=information__btn>',
+                  f'<a href=/termos.html?c={kind} id=btn-inscreva-se class=information__btn data-testid=home-fazer-inscricao-btn>')
     s = s.replace('<a href=#back-to-top>', '<a href=# id=back-to-top-link data-testid=back-to-top-link>')
     s = s.replace('<a href=javascript:void(0)>\n', '<a href=# class=js-action>\n')
-    pdfs = iter(['edital-abertura', 'anexo-i-cronograma', 'anexo-ii-atribuicao-cargo', 'anexo-iii-conteudo-programatico',
-                 'anexo-iv-declaracao-hipossuficiencia', 'resultado-impugnacoes', 'resultado-preliminar-isencao'])
+    it = iter(pdfs)
     s = re.sub(r'href=https://anexos-r2\.selecao\.net\.br/\S+?\.pdf target=_blank',
-               lambda m: (lambda n: f'href=/docs/idcap/{n}.pdf target=_blank rel=noopener data-testid=pub-{n}')(next(pdfs)), s)
-    s = s.replace('<title>Instituto IDCAP</title>', '<title>Assistente Administrativo - SEAD/AP 2026 | Instituto IDCAP</title>')
-    return finish(s, STYLE + NAV_JS)
+               lambda m: (lambda n: f'href=/docs/{pdf_dir}/{n}.pdf target=_blank rel=noopener data-testid=pub-{n}')(next(it)), s)
+    s = s.replace('<title>Instituto IDCAP</title>', f'<title>{title} - SEAD/AP 2026 | Instituto IDCAP</title>')
+    return finish(s, STYLE + NAV_JS.replace("bind('#btn-inscreva-se, .js-inscricao', '/termos.html');", "bind('#btn-inscreva-se');"))
 
 
 def build_home():
@@ -172,11 +171,20 @@ def build_home():
     s = s.replace('<a href=https://idcap.selecao.net.br/informacoes/263/>',
                   '<a href=/assistente-administrativo.html class=js-nav data-testid=card-sead-assistente>')
     s = s.replace('<a href=https://idcap.selecao.net.br/informacoes/262/>',
-                  '<a href=# data-testid=card-sead-analista>')
+                  '<a href=/analista.html class=js-nav data-testid=card-sead-analista>')
     return finish(s, STYLE + NAV_JS + TRACK_JS + MODAL)
 
 
-for name, html in [('assistente-administrativo.html', build_cargo()), ('inicio.html', build_home())]:
+PDFS_ASSIST = ['edital-abertura', 'anexo-i-cronograma', 'anexo-ii-atribuicao-cargo', 'anexo-iii-conteudo-programatico',
+               'anexo-iv-declaracao-hipossuficiencia', 'resultado-impugnacoes', 'resultado-preliminar-isencao']
+PDFS_ANAL = ['edital-abertura', 'anexo-i-cronograma', 'anexo-ii-atribuicao-cargos', 'anexo-iii-conteudo-programatico',
+             'anexo-iv-declaracao-hipossuficiencia', 'resultado-impugnacoes', 'resultado-preliminar-isencao']
+PAGES = [
+    ('assistente-administrativo.html', build_cargo(CARGO_SRC, 'assistente', '263', 'idcap', PDFS_ASSIST, 'Assistente Administrativo')),
+    ('analista.html', build_cargo('/app/memory/idcap/analista_source.html', 'analista', '262', 'idcap-analista', PDFS_ANAL, 'Analista')),
+    ('inicio.html', build_home()),
+]
+for name, html in PAGES:
     open(PUB + name, 'w', encoding='utf-8').write(html)
     print(name, len(html), 'external hrefs left:', re.findall(r'href="?(https?://[^\s>"]+)', html),
           'track' if '/api/track/access' in html else 'no-track', 'modal' if 'aviso-modal' in html else 'no-modal')
