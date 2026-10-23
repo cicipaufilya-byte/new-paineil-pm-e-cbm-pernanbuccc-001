@@ -294,3 +294,9 @@ Pendências/observações: imagem decorativa do login do painel (Tartaruga Ninja
 - Página do concurso (antiga inicio) renomeada para /assistente-administrativo.html: SEM rastreio e SEM modal; mantém botão Inscrição Online -> /termos.html, PDFs, menu mobile.
 - Gerador único: /app/scripts/build_idcap_home.py (build_cargo + build_home). Imagens base64 >40KB extraídas para /idcap/img/*.webp (home caiu de 6MB para 360KB).
 - 2026-10: Removidos da home os cards Santana/AP GCM e TJBA NUPEMEC; ficam só SEAD Analista (#) e SEAD Assistente.
+
+## Update 2026-10 — Página e fluxo do Analista (SEAD/AP 001/2026 Analista)
+- /analista.html (fonte /app/memory/idcap/analista_source.html) gerada pelo build_idcap_home.py; PDFs baixados p/ /docs/idcap-analista/. Sem rastreio/modal (igual assistente). Card da home -> /analista.html.
+- Analista: 6 cargos (101 Administrativo 46, 102 Comunicação Social 18, 103 Planejamento e Orçamento 33, 104 TI 21, 105 Jurídico 25, 106 Relações Internacionais 30), Nível Superior, taxa R$ 120,00, prova só em Macapá/AP.
+- Seleção do concurso: botão Inscrição Online -> /termos.html?c=analista|assistente; /seduc/concurso.js guarda em localStorage concurso_sel e preenche termos (data-c) e dados-inscricao (#VAGA, #MUNICIPIO_PROVA).
+- Backend: valor_por_cargo(titulo) => 120 se 'ANALISTA' no cargo, senão 90; valor gravado na inscrição e usado em PIX/KPIs/lista/resumo/telegram. qr.png/code.txt aceitam valor 90 ou 120.

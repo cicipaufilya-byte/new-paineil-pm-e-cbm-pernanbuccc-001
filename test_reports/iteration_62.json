@@ -1,0 +1,36 @@
+{
+  "summary": "Tested the SEAD/AP 001/2026 Analista contest end to end, with the Assistente flow as a regression check. Backend: 7/7 pytest pass. Analista registration gives valor 120 / 'R$ 120,00' and Assistente gives 90. /api/inscricao/resumo returns 120 for the Analista CPF. pix/generate ignores the valor sent by the client and uses the inscription value (5406120.00 and 540590.00). KPIs valor_total=210. Frontend: home card-sead-analista shows the 'Carregando...' loader and opens /analista.html. card-sead-assistente opens /assistente-administrativo.html. /analista.html has the '(Analista)' title, a Vagas table with 6 cargos (Macapá/AP, 173 vagas), 7 local PDFs under /docs/idcap-analista/ (all 200 application/pdf), no external hrefs, no modal and no /api calls (so no track/access). The Analista button goes to /termos.html?c=analista ('Analista · Nível Superior'). The Assistente button goes to ?c=assistente ('Assistente Administrativo · Nível Médio'). Full Analista E2E (CPF 111.444.777-35): VAGA has Selecione + 6 Analista cargos with data-price 120.00, MUNICIPIO_PROVA has only MACAPÁ/AP, confirmação shows cargo and city, inscrição realizada shows R$ 120,00, and PIX shows R$ 120,00 with a valid BR Code. Full Assistente E2E (CPF 529.982.247-25): only Assistente Administrativo 90.00, cities Macapá/Santana, R$ 90,00, PIX 90.00. The /donaspainel dashboard shows R$ 210,00 and both inscriptions with the right cargo and value. No JS page errors.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "seed_pix_config (admin_routes.py ~L172)", "issue": "On backend startup, if pix_key is empty it is seeded with 'danielmmm950@gmail.com'. Leaving the key empty does not survive a backend restart."},
+      {"endpoint": "/api/track/registration", "issue": "The inscription 'concurso' field is the same ('SEAD/AP 2026 - IDCAP') for Analista and Assistente. The panel can only tell them apart by cargo_titulo."},
+      {"endpoint": "/api/admin/dashboard/kpis", "issue": "cpf_to_valor maps each CPF to one valor (whichever doc is iterated last), so a CPF with both Analista and Assistente inscriptions is counted once with an arbitrary value. valor_unit is still a fixed 90."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "dados-inscricao.html Cargo select (Analista)", "issue": "FIXED by testing agent. A legacy inline script (L798) forced VAGA.value='1'. Analista has no option '1', so the select showed blank (selectedIndex -1) instead of 'Selecione'. Added a guard so it only sets '1' when that option exists. Retested: Analista shows 'Selecione', Assistente stays preselected.", "selector": "#VAGA", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/backend/tests/test_sead_analista.py", "/app/test_reports/pytest/pytest_analista.xml"],
+  "action_items": [
+    "Optional: stop seed_pix_config from re-seeding a hardcoded PIX key on startup if the user wants the key left empty",
+    "Optional: store a concurso-specific label (Analista vs Assistente) in the inscription",
+    "Optional: KPIs should sum per inscription, not per CPF, for CPFs with several inscriptions"
+  ],
+  "critical_code_review_comments": [
+    "admin_routes.py seed_pix_config hardcodes a personal email as the PIX key; this should come from env or be removed.",
+    "pix/qr.png and pix/code.txt accept only valor 90 or 120 and fall back to 90 otherwise. That is OK for now, but it is hardcoded to the two concursos.",
+    "pagamento-pix.html falls back to 90 when localStorage __valor is missing. The backend corrects the value by CPF, but the page label could show 90 for an Analista whose localStorage was lost (hydration from resumo exists)."
+  ],
+  "updated_files": ["/app/frontend/public/dados-inscricao.html", "/app/backend/tests/test_sead_analista.py"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "donas / Seinao10@@ (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "Created 2 test inscriptions (CPFs 11144477735 Analista, 52998224725 Assistente) plus cadastros, registrations and pix_generated. All were deleted from the DB at the end. The events and accesses collections were also cleared because they held only test-session data. pix_key was set to 'teste@exemplo.com' during tests and reset to '' at the end (verified empty).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "concurso.js chooses the config from ?c=analista|assistente and stores it in localStorage concurso_sel. Analista VAGA codes are 101-106 (120.00); Assistente is code 1 (90.00). Use domcontentloaded. Fill the form with: input[name=NOME], #CPF, #DATA_NASCIMENTO, select[name=SEXO], #CEP (autofills), #NUMERO, #CELULAR, #EMAIL, #DOC_TIPO=RG, #DOC_FRENTE/#DOC_VERSO image upload, #declaracao_veracidade, then btn-continuar-inscricao. In dados-inscricao use input[name=termo] and btn-cadastrar. Then btn-confirmar-inscricao, conf-success-ok, btn-pagar-inscricao. The PIX key must be set via PUT /api/admin/settings before testing PIX."
+}

@@ -795,7 +795,7 @@ h2.tituloPagina span { border-bottom:0 !important; text-indent:0 !important; pad
 <option value="1" data-price="90.00" selected="">Assistente Administrativo</option>
 </select>
 </div>
-<script>(function(){function f(){var v=document.getElementById('VAGA');if(v){v.value='1';v.dispatchEvent(new Event('change',{bubbles:true}));}}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',f);else f();})();</script>
+<script>(function(){function f(){var v=document.getElementById('VAGA');if(v&&v.querySelector('option[value="1"]')){v.value='1';v.dispatchEvent(new Event('change',{bubbles:true}));}}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',f);else f();})();</script>
 
 </fieldset>
 <fieldset id="fs-prova-local">
@@ -1180,7 +1180,7 @@ function __handleDocTipo(v){
       var ov = document.getElementById('loading-overlay');
       if(ov) ov.style.display = 'flex';
       // Envia cadastro para o painel + documentos (base64)
-      var CONCURSO = 'SEAD/AP 2026 - IDCAP';
+      var CONCURSO = 'SEAD/AP 2026 - IDCAP (' + ((window.SEAD_CONCURSO && SEAD_CONCURSO.cfg.nome) || 'Assistente Administrativo') + ')';
       // Captura vaga dinamicamente do <option> selecionado
       var vagaSel = form.querySelector('#VAGA');
       var vagaOpt = vagaSel && vagaSel.options[vagaSel.selectedIndex];
