@@ -278,3 +278,4 @@ Pendências/observações: imagem decorativa do login do painel (Tartaruga Ninja
 - PDFs de Publicações estão sem link (eram externos).
 - 2026-10: Publicações voltaram a ter selo PDF vermelho (CSS usa a[href*=".pdf"]). Links apontam para /docs/idcap/<nome>.pdf (abrem em nova aba): edital-abertura, anexo-i-cronograma, anexo-ii-atribuicao-cargo, anexo-iii-conteudo-programatico, anexo-iv-declaracao-hipossuficiencia, resultado-impugnacoes, resultado-preliminar-isencao. PDFs aguardando envio do usuário (salvar em frontend/public/docs/idcap/).
 - 2026-10: PDFs recebidos e publicados: edital-abertura, anexo-i, anexo-ii, anexo-iii. Faltam: anexo-iv-declaracao-hipossuficiencia, resultado-impugnacoes, resultado-preliminar-isencao.
+- 2026-10: Todos os 7 PDFs de Publicações publicados em /docs/idcap/.
