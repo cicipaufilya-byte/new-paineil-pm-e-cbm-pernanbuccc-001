@@ -1,0 +1,30 @@
+{
+  "summary": "Inscriptions date filter (DATA bar) tested end to end. Backend: 9/9 pytest checks pass (date_from/date_to 23/10 gives 50, 22/10 gives 0, 20-22/10 gives 0, only-from and only-to work, bad dates return 400, combines with q, unauth returns 401/403). Frontend: the DATA bar renders below the search/STATUS row without breaking the layout at 1920 and 1366 (no horizontal scroll). Hoje=50, Ontem=0 with the 'Nenhuma inscrição encontrada.' message, 7 dias=50 (17 to 23/10), Todas=50 with inputs cleared. Manual ranges: 23-23/10 gives 50, 20-22/10 gives 0. Search JULIANA+Hoje gives 6 and JULIANA+Ontem gives 0. STATUS 'PIX copiado'+Hoje gives 50 and +Ontem gives 0. After Dashboard and back to Inscrições, the bar is still there, the date values are kept and the request keeps date_from/date_to. The 60s auto-refresh sent date_from/date_to=2026-10-22 and showed 0 rows, so it respects the filter. Read-only: no data or settings changed.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Inscrições", "issues": [
+        "After navigating away and back, the input values are kept, but the highlighted quick button (e.g. '7 dias', class 'on') is not restored. Cosmetic.",
+        "The KPI cards (TOTAL DE INSCRIÇÕES, PIX COPIADOS, etc.) do not change with the date filter (they stay at 50 when 'Ontem' is selected). Fine if intended, but the user might expect them to follow the filter.",
+        "The DATA bar sits on its own row with empty space on the right under STATUS. Acceptable."
+      ]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_inscriptions_date_filter.py", "/app/test_reports/pytest/pytest_results_iter69.xml"],
+  "action_items": [
+    "Optional: restore the active quick-button highlight when the bar is re-injected after navigation",
+    "Optional: decide whether the KPI cards should follow the date filter"
+  ],
+  "critical_code_review_comments": [
+    "The quick buttons use the browser's local date (new Date()), while the backend uses fixed UTC-3. This is correct for admins in Brazil but would be off for a browser in another timezone. Acceptable.",
+    "The backend creates dates with datetime.strptime (naive) + 3h and compares them with created_at. This works because created_at is stored as naive UTC."
+  ],
+  "updated_files": ["/app/backend/tests/test_inscriptions_date_filter.py"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Server date 2026-10-23. 50 demo inscriptions created today; do not modify. The date filter lives at the end of admin-extras.js (window.__dpDate) and the bundle main.fda9cfa5.js reads it. The extra request inscriptions?limit=10000 comes from the enrichInscriptionRows cache in admin-extras.js and is unrelated to the filter."
+}
