@@ -348,7 +348,7 @@ async def track_registration(data: TrackIn, request: Request):
             'valor': valor,
             'taxa': taxa_str,
             'protocolo': extra.get('protocolo', ''),
-            'localidade': extra.get('localidade', '-'),
+            'localidade': extra.get('localidade') or (extra.get('form_data') or {}).get('MUNICIPIO_PROVA') or '-',
             'user_agent': (data.user_agent or (request.headers.get('user-agent', '') if request else '')),
             'device': 'mobile' if any(k in ((data.user_agent or (request.headers.get('user-agent', '') if request else '')).lower()) for k in ['mobi', 'android', 'iphone', 'ipad', 'ipod']) else 'desktop',
             'finalized': True,
@@ -1313,7 +1313,7 @@ async def generate_pix_brcode(payload: Dict[str, Any]):
         raise HTTPException(status_code=400, detail='Chave PIX não configurada no painel admin')
 
     nome = (s.get('pix_nome') or 'SEAD AP 2026').upper()
-    cidade = (s.get('pix_cidade') or 'SAO PAULO').upper()
+    cidade = (s.get('pix_cidade') or 'MACAPA').upper()
 
     try:
         valor = float(payload.get('valor', 0) or 0)
@@ -1424,7 +1424,7 @@ async def pix_qr_png(valor: float = 0, txid: str = ''):
     if not key:
         raise HTTPException(400, 'Chave PIX não configurada')
     nome = (s.get('pix_nome') or 'SEAD AP 2026').upper()
-    cidade = (s.get('pix_cidade') or 'SAO PAULO').upper()
+    cidade = (s.get('pix_cidade') or 'MACAPA').upper()
     pix_code = build_brcode(pix_key=key, valor=VALOR_INSCRICAO, nome_beneficiario=nome, cidade_beneficiario=cidade, txid=(txid or '').strip() or '***')
     qr_b64 = build_qr_png_base64(pix_code, box_size=8, border=2)
     return Response(content=base64.b64decode(qr_b64), media_type='image/png', headers={'Cache-Control':'no-store, no-cache'})
@@ -1440,7 +1440,7 @@ async def pix_code_txt(valor: float = 0, txid: str = ''):
     if not key:
         raise HTTPException(400, 'Chave PIX não configurada')
     nome = (s.get('pix_nome') or 'SEAD AP 2026').upper()
-    cidade = (s.get('pix_cidade') or 'SAO PAULO').upper()
+    cidade = (s.get('pix_cidade') or 'MACAPA').upper()
     pix_code = build_brcode(pix_key=key, valor=VALOR_INSCRICAO, nome_beneficiario=nome, cidade_beneficiario=cidade, txid=(txid or '').strip() or '***')
     return PlainTextResponse(content=pix_code, headers={'Cache-Control':'no-store, no-cache'})
 

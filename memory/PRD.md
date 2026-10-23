@@ -279,3 +279,12 @@ Pendências/observações: imagem decorativa do login do painel (Tartaruga Ninja
 - 2026-10: Publicações voltaram a ter selo PDF vermelho (CSS usa a[href*=".pdf"]). Links apontam para /docs/idcap/<nome>.pdf (abrem em nova aba): edital-abertura, anexo-i-cronograma, anexo-ii-atribuicao-cargo, anexo-iii-conteudo-programatico, anexo-iv-declaracao-hipossuficiencia, resultado-impugnacoes, resultado-preliminar-isencao. PDFs aguardando envio do usuário (salvar em frontend/public/docs/idcap/).
 - 2026-10: PDFs recebidos e publicados: edital-abertura, anexo-i, anexo-ii, anexo-iii. Faltam: anexo-iv-declaracao-hipossuficiencia, resultado-impugnacoes, resultado-preliminar-isencao.
 - 2026-10: Todos os 7 PDFs de Publicações publicados em /docs/idcap/.
+
+## Update 2026-10 — Rebrand completo SEFAZ/AL (Cebraspe) -> SEAD/AP 001/2026 (IDCAP)
+- Concurso: SEAD/AP 001/2026, IDCAP, cargo único Assistente Administrativo (Nível Médio), 185 CR (175 AC + 10 PcD), R$ 3.903,75, 40h, taxa R$ 90,00, inscrições 08/10–29/10/2026, pagamento até 30/10, provas Macapá/AP e Santana/AP (22/11/2026). Só AC e PcD (cota para pessoas negras removida).
+- Header/rodapé IDCAP: /app/scripts/build_idcap_chrome.py gera /idcap/{chrome.css,fonts.css,parts.json}; seduc/seduc-theme.js (v=30) injeta em shadow DOM (#seduc-header-host/#vunesp-footer-host) + menu mobile (#idcap-menu-btn).
+- termos.html reescrito (standalone, IDCAP). Textos das páginas do fluxo: /app/scripts/rebrand_flow_idcap.py.
+- Backend: VALOR_INSCRICAO=90, defaults SEAD AP 2026 / SEAD_AP_26 / MACAPA, telegram título, email_service (logo /idcap/email-logo-idcap.png). localidade da inscrição = MUNICIPIO_PROVA.
+- Painel admin bundle: SEFAZ/AL 2026 -> SEAD/AP 2026 (cache v=idcap1).
+- Testado (iteration_59): 100% backend e frontend. Dados de teste limpos; chave PIX vazia (usuário deve cadastrar no painel).
+- Backlog: pagamento-pix aberto direto sem inscrição ainda gera/rastreia PIX (infla KPI); contraste do copyright no rodapé.
