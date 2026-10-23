@@ -1,0 +1,14 @@
+{
+  "summary": "Quick frontend regression of home (/ = inicio.html) after removing the Santana/AP GCM and TJBA NUPEMEC cards. All checks passed on desktop 1920 and mobile 390.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": ["build_idcap_home.py and inicio.html both free of Santana/NUPEMEC references - source and generated output are consistent."],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (skipped)", "frontend": "100%"},
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Home has exactly 2 .list__item cards (SEAD Analista 173 vagas, SEAD Assistente Administrativo 185 vagas), centered side by side on desktop (350px each, x=595/975), stacked on mobile with no horizontal overflow (scrollWidth=390). No 'Santana', 'GCM', 'NUPEMEC' text. Aviso modal opens after sessionStorage clear and closes via aviso-importante-ok. POST /api/track/access fired (4 times over 2 loads+reloads). card-sead-assistente -> /assistente-administrativo.html. Zero external http(s) hrefs."
+}
