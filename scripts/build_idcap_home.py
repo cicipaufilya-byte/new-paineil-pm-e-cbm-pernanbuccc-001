@@ -20,7 +20,11 @@ s = s.replace('<a class=header__btn>', '<a class=header__btn id=menu-toggle data
 s = s.replace('<a href=#back-to-top>', '<a href=# id=back-to-top-link data-testid=back-to-top-link>')
 s = s.replace('<a href=javascript:void(0)>\n', '<a href=# class=js-action>\n')
 
-s = re.sub(r'\s*target=_blank', '', s)
+PDFS = iter(['edital-abertura', 'anexo-i-cronograma', 'anexo-ii-atribuicao-cargo', 'anexo-iii-conteudo-programatico',
+             'anexo-iv-declaracao-hipossuficiencia', 'resultado-impugnacoes', 'resultado-preliminar-isencao'])
+s = re.sub(r'href=https://anexos-r2\.selecao\.net\.br/\S+?\.pdf target=_blank',
+           lambda m: (lambda n: f'href=/docs/idcap/{n}.pdf target=_blank rel=noopener data-testid=pub-{n}')(next(PDFS)), s)
+s = re.sub(r'\s*target=_blank(?! rel=noopener)', '', s)
 s = re.sub(r'href="?https?://[^\s>"]+"?', 'href=#', s)
 
 s = re.sub(r'<div vw class=enabled>.*?</div>\s*</div>\s*</div>', '', s, flags=re.S)
