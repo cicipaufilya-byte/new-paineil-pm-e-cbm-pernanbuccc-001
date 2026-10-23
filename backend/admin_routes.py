@@ -709,7 +709,9 @@ async def count_today(col: str) -> int:
     return await _db[col].count_documents({'created_at': {'$gte': start}})
 
 @admin_router.get('/admin/dashboard/kpis')
-async def kpis(user=Depends(require_admin)):
+async def kpis(q: str = '', status: str = '', date_from: str = '', date_to: str = '', user=Depends(require_admin)):
+    if q or status or date_from or date_to:
+        return await _kpis_filtrados(q, status, date_from, date_to, user)
     cols = ['accesses', 'registrations', 'pix_generated', 'pix_copied', 'pix_downloaded']
     total = {c: await _db[c].count_documents({}) for c in cols}
     today = {c: await count_today(c) for c in cols}
@@ -758,6 +760,30 @@ async def kpis(user=Depends(require_admin)):
         'valor_unit': VALOR_INSCRICAO,
         'today': today,
     }
+
+async def _kpis_filtrados(q, status, date_from, date_to, user):
+    res = await list_inscriptions(skip=0, limit=100000, q=q, status=status, date_from=date_from, date_to=date_to, user=user)
+    items = res.get('items', [])
+    gen = [i for i in items if i.get('status') in ('PIX gerado', 'PIX copiado', 'PIX baixado')]
+    cop = [i for i in items if i.get('status') in ('PIX copiado', 'PIX baixado')]
+    bai = [i for i in items if i.get('status') == 'PIX baixado']
+    soma = lambda lst: sum(float(i.get('valor') or 0) for i in lst)
+    acc_filt = {}
+    if date_from or date_to:
+        rng = {}
+        if date_from:
+            rng['$gte'] = datetime.strptime(date_from, '%Y-%m-%d') + timedelta(hours=3)
+        if date_to:
+            rng['$lt'] = datetime.strptime(date_to, '%Y-%m-%d') + timedelta(days=1, hours=3)
+        acc_filt['created_at'] = rng
+    return {
+        'acessos': await _db.accesses.count_documents(acc_filt),
+        'inscricoes': len(items),
+        'pix_gerados': len(gen), 'pix_copiados': len(cop), 'pix_baixados': len(bai),
+        'valor_total': soma(gen), 'valor_copiados': soma(cop), 'valor_baixados': soma(bai),
+        'valor_unit': VALOR_INSCRICAO, 'filtrado': True,
+    }
+
 
 @admin_router.get('/admin/dashboard/funnel')
 async def funnel(user=Depends(require_admin)):
