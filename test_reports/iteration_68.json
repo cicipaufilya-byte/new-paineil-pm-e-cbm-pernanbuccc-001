@@ -1,0 +1,32 @@
+{
+  "summary": "Iteration 68. Read-only testing: no inscriptions or settings were created, changed or deleted. (A) Mobile fixes, tested in Chromium mobile emulation (touch, Android UA at 360x780 and iOS UA at 390x844) and at desktop 1920. All iteration_67 issues are FIXED. On /inscricao, /dados-inscricao, /confirmacao, /inscricao-realizada and /pagamento-pix the body padding-top now equals the header height (90px on mobile, 170px on desktop). The 'SEAD/AP 2026' h3.vn-keep sits at top 122-159px on mobile and 198-250px on desktop, so it is no longer covered. The home search input is 16px on mobile. The hamburger is 44px wide on every page (none on /minhas-inscricoes, by design). No horizontal scroll anywhere. On confirmacao, h2.tituloPagina and .vn-sub use the Silka font. On dados-inscricao, #btn-voltar-dados is a pill (radius 999px, white background, blue rgb(53,118,251) text, 44px tall). (B) The 50 seeded inscriptions were checked through the API (pytest) and the panel UI. KPIs: 50 inscriptions, 50 PIX generated, 50 PIX copied, 0 downloaded, total R$ 5.250,00, copied R$ 5.250,00. The list has 50 rows, every name/CPF/cargo/value/device matches seed_50.log, all have status 'PIX copiado' and none is paid. Devices: inscriptions 25 mobile / 25 desktop. Top locations: Macapá 45, Santana 5. In Área do Candidato, CPF 488.766.344-79 shows JULIANA CARDOSO AMANAJÁS, Analista de Tecnologia da Informação, R$ 120,00, and CPF 976.846.978-11 shows VANESSA DE SOUZA CORRÊA, Assistente Administrativo, R$ 90,00, both marked PENDENTE DE PAGAMENTO.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "seed data / inscricoes collection", "issue": "Locations are inconsistent. The 50 accesses are Macapá/Santana AP, but the 50 inscricoes docs have city/uf taken from geolocating the random X-Forwarded-For IPs in the seed script: São Paulo/SP x5, Fortaleza/CE x3, Bogotá/DC x3, Porto Alegre, Joinville and others. Only 'Belém' and 'Santana do Araguaia' are even in the North region, and none are in AP. This shows wherever the inscription's city is used, including the Telegram message 'local' (admin_routes.py ~L1532) and the panel detail view. The accesses look like they were patched afterwards, but the inscriptions were not. Fix: update inscricoes.city/uf/region_name to match the visitor's access record (Macapá/Santana, AP, Amapá)."},
+      {"endpoint": "seed data timestamps", "issue": "All 50 inscriptions were created between 17:48 and 17:53 on 23/10/2026, about 6 seconds apart. In the panel's activity chart this is one burst rather than organic traffic. If realism matters, spread created_at, finalized_at and the pix_* timestamps over hours or days."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "confirmacao desktop 1920", "issues": ["'Confirmação dos Dados' is left-aligned, while 'SEAD/AP 2026' above it is centred. Mobile is centred. Cosmetic only."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_seed50_readonly.py", "/app/test_reports/pytest/pytest_iter68.xml"],
+  "action_items": [
+    "Optional: re-geolocate or patch inscricoes.city/uf to Macapá/Santana AP so they match the accesses (the Telegram message and panel details currently show cities from other states).",
+    "Accesses KPI now shows 51 instead of 50. One extra access doc (ip 136.108.30.124, North Charleston/SC, page '/', created 2026-10-23 17:57:28) was created by the testing agent's browser hitting the home page. The main agent can delete it to restore 50 accesses / 26 desktop / Macapá+Santana only. The testing agent did not delete it because of the 'do not delete data' instruction."
+  ],
+  "critical_code_review_comments": [
+    "kpis() reads all of pix_generated, pix_copied and pix_downloaded on every call. That is fine at 50 records but will not scale.",
+    "The home page and every public page fire POST /api/track/access with no bot or QA filter, so test runs pollute the KPIs."
+  ],
+  "updated_files": ["/app/backend/tests/test_seed50_readonly.py"],
+  "success_rate": {"backend": "100% (9/9 read-only tests)", "frontend": "100% of requested checks"},
+  "seed_data_creation": "None. In the layout tests, POST /api/* calls were stubbed to avoid writes. The one exception was the tool's initial home-page navigation, which created 1 access doc (see action_items).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "DB holds the 50 seeded inscriptions (see /app/memory/seed_50.log) plus 51 accesses (1 of them from QA). Run tests/test_seed50_readonly.py as a read-only regression. test_accesses expects total==50, so it will fail until the QA access is removed. When testing UI, stub POST /api/track/* to avoid polluting KPIs and Telegram. Settings hold a real PIX key and Telegram config; do not change them."
+}

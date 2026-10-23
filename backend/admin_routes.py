@@ -933,9 +933,19 @@ async def list_accesses(skip: int = 0, limit: int = 10000, q: str = '', user=Dep
     return {'items': items, 'total': total}
 
 @admin_router.get('/admin/inscriptions')
-async def list_inscriptions(skip: int = 0, limit: int = 10000, q: str = '', status: str = '', user=Depends(require_admin)):
+async def list_inscriptions(skip: int = 0, limit: int = 10000, q: str = '', status: str = '', date_from: str = '', date_to: str = '', user=Depends(require_admin)):
     # Apenas inscrições finalizadas (que clicaram em "Prosseguir Pré-Inscrição")
     filt = {'finalized': True}
+    rng = {}
+    try:
+        if date_from:
+            rng['$gte'] = datetime.strptime(date_from, '%Y-%m-%d') + timedelta(hours=3)
+        if date_to:
+            rng['$lt'] = datetime.strptime(date_to, '%Y-%m-%d') + timedelta(days=1, hours=3)
+    except ValueError:
+        raise HTTPException(status_code=400, detail='Data inválida (use AAAA-MM-DD)')
+    if rng:
+        filt['created_at'] = rng
     if q:
         filt['$or'] = [
             {'nome': {'$regex': q, '$options': 'i'}},

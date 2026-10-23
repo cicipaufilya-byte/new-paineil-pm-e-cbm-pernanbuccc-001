@@ -846,3 +846,68 @@
     enhanceDetailModal: enhanceDetailModal
   };
 })();
+
+/* Filtro de inscrições por data (#/inscricoes) */
+(function () {
+  window.__dpDate = window.__dpDate || { from: '', to: '' };
+  if (!document.getElementById('dp-date-style')) {
+    var st = document.createElement('style');
+    st.id = 'dp-date-style';
+    st.textContent = '.dp-date-wrap{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#fff;border:1px solid #ece8f5;border-radius:14px;padding:8px 14px;min-height:52px;box-sizing:border-box}'
+      + '.dp-date-wrap .lb{font-size:12px;font-weight:700;letter-spacing:2px;color:#4b4463}'
+      + '.dp-date-wrap input[type=date]{border:1px solid #ddd6ee;border-radius:10px;padding:7px 10px;font:inherit;font-size:14px;color:#1f1a2e;background:#faf9fd}'
+      + '.dp-date-wrap input[type=date]:focus{outline:0;border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,.15)}'
+      + '.dp-date-wrap .sep{color:#8a7fa3;font-size:13px}'
+      + '.dp-date-wrap button{border:1px solid #ddd6ee;background:#fff;color:#4b4463;border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:background-color .15s,color .15s}'
+      + '.dp-date-wrap button:hover{background:#f3efff;color:#6d28d9}'
+      + '.dp-date-wrap button.on{background:#7c3aed;border-color:#7c3aed;color:#fff}'
+      + '.dp-toolbar{flex-wrap:wrap}';
+    document.head.appendChild(st);
+  }
+  function ymd(d) { var z = function (n) { return (n < 10 ? '0' : '') + n; }; return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()); }
+  function shift(n) { var d = new Date(); d.setDate(d.getDate() + n); return ymd(d); }
+  function apply(from, to, wrap) {
+    window.__dpDate = { from: from || '', to: to || '' };
+    if (wrap) {
+      wrap.querySelector('#dp-date-from').value = window.__dpDate.from;
+      wrap.querySelector('#dp-date-to').value = window.__dpDate.to;
+      wrap.querySelectorAll('button[data-k]').forEach(function (b) { b.classList.remove('on'); });
+    }
+    var r = document.querySelector('[data-testid=btn-refresh]');
+    if (r) r.click();
+  }
+  function inject() {
+    var search = document.querySelector('[data-testid=search-inscricoes]');
+    if (!search) return;
+    var bar = search.closest('.dp-toolbar');
+    if (!bar || bar.querySelector('.dp-date-wrap')) return;
+    var w = document.createElement('div');
+    w.className = 'dp-date-wrap';
+    w.setAttribute('data-testid', 'filter-date');
+    w.innerHTML = '<span class="lb">DATA:</span>'
+      + '<input type="date" id="dp-date-from" data-testid="filter-date-from" aria-label="Data inicial">'
+      + '<span class="sep">até</span>'
+      + '<input type="date" id="dp-date-to" data-testid="filter-date-to" aria-label="Data final">'
+      + '<button type="button" data-k="hoje" data-testid="filter-date-hoje">Hoje</button>'
+      + '<button type="button" data-k="ontem" data-testid="filter-date-ontem">Ontem</button>'
+      + '<button type="button" data-k="7d" data-testid="filter-date-7d">7 dias</button>'
+      + '<button type="button" data-k="limpar" data-testid="filter-date-limpar">Todas</button>';
+    bar.appendChild(w);
+    var f = w.querySelector('#dp-date-from'), t = w.querySelector('#dp-date-to');
+    f.value = window.__dpDate.from; t.value = window.__dpDate.to;
+    f.addEventListener('change', function () { apply(f.value, t.value, w); });
+    t.addEventListener('change', function () { apply(f.value, t.value, w); });
+    w.querySelectorAll('button[data-k]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var k = b.getAttribute('data-k');
+        if (k === 'hoje') apply(shift(0), shift(0), w);
+        else if (k === 'ontem') apply(shift(-1), shift(-1), w);
+        else if (k === '7d') apply(shift(-6), shift(0), w);
+        else apply('', '', w);
+        if (k !== 'limpar') b.classList.add('on');
+      });
+    });
+  }
+  new MutationObserver(inject).observe(document.documentElement, { childList: true, subtree: true });
+  inject();
+})();
