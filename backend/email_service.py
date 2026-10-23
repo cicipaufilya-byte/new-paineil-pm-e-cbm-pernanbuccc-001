@@ -37,7 +37,7 @@ CONCURSO_NOME = "SEAD/AP 2026 - IDCAP"
 ORGAO = "Secretaria de Estado da Administração do Amapá"
 ORGANIZADORA = "Organização: IDCAP"
 EDITAL = "Edital nº 001/2026 · Organização: IDCAP"
-PRAZO = "21/10/2026, às 23h59 (horário de Brasília)"
+PRAZO = "30/10/2026, às 23h59 (horário de Brasília)"
 
 # ----------------------------------------------------------------------------
 # Guardrail gate (copiado do playbook — chamar em todo envio)
@@ -190,6 +190,11 @@ def _safe_base(*urls: str) -> str:
     return ""
 
 
+def _hoje() -> str:
+    from datetime import datetime, timedelta, timezone
+    return (datetime.now(timezone.utc) - timedelta(hours=3)).strftime('%d/%m/%Y')
+
+
 def _shell(inner: str, base: str = "") -> str:
     base = _safe_base(APP_PUBLIC_URL, base)
     logo_url = _safe_base(EMAIL_LOGO_URL) or (f"{base}/idcap/email-logo-idcap.png" if base else "")
@@ -204,7 +209,7 @@ def _shell(inner: str, base: str = "") -> str:
         '<tr><td align="center">'
         '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" '
         'style="max-width:600px;width:100%;background:#ffffff;border:1px solid #e0e0e0;border-radius:6px;overflow:hidden">'
-        '<tr><td style="height:6px;background:#00385e;font-size:0;line-height:0">&nbsp;</td></tr>'
+        '<tr><td style="height:6px;background:#1b3c82;font-size:0;line-height:0">&nbsp;</td></tr>'
         '<tr><td align="center" style="padding:28px 28px 20px;border-bottom:1px solid #e5e5e5;background:#ffffff">'
         f'{logo}'
         '<div style="font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:bold;color:#1b3c82;line-height:1.3">SEAD/AP 2026</div>'
@@ -217,7 +222,7 @@ def _shell(inner: str, base: str = "") -> str:
         f'Enviado por {escape(CONCURSO_NOME)}. Este é um e-mail automático de confirmação; não é necessário respondê-lo. '
         'Por segurança, nunca solicitamos senha, código ou dados de cartão por e-mail.'
         '</p></td></tr>'
-        '<tr><td style="height:6px;background:#00385e;font-size:0;line-height:0">&nbsp;</td></tr>'
+        '<tr><td style="height:6px;background:#1b3c82;font-size:0;line-height:0">&nbsp;</td></tr>'
         '</table></td></tr></table>'
     )
 
@@ -227,7 +232,7 @@ def _button(label: str, href: str) -> str:
         return ""
     return (
         '<table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px 0 6px">'
-        f'<tr><td style="border-radius:4px;background:#00385e">'
+        f'<tr><td style="border-radius:4px;background:#1b3c82">'
         f'<a href="{escape(href)}" style="display:inline-block;padding:14px 32px;font-size:15px;'
         'font-weight:bold;color:#ffffff;text-decoration:none;font-family:Arial,Helvetica,sans-serif">'
         f'{escape(label)}</a>'
@@ -254,14 +259,14 @@ def build_inscricao_email_html(*, nome: str, cpf: str, protocolo: str, cargo: st
     rows += _row("CPF:", cpf or "-")
     if cargo:
         rows += _row("Cargo:", cargo)
-    rows += _row("Concurso:", f"{ORGAO} - Edital nº 1")
+    rows += _row("Concurso:", f"{ORGAO} - Edital nº 001/2026" + (" (Analista)" if "ANALISTA" in cargo.upper() else " (Assistente Administrativo)"))
     rows += _row("Valor da inscrição:", _fmt_valor(valor))
     primeiro = escape(nome.split()[0].capitalize()) if (nome or "").strip() else "candidato(a)"
     inner = (
         f'<p style="margin:0 0 14px;font-size:17px;color:#111">Olá, {primeiro}!</p>'
         + ('<p style="margin:0 0 18px;font-size:14px;color:#2b3a30;line-height:1.6">'
-           'Sua inscrição está <strong>pendente de pagamento</strong> e o prazo termina <strong>hoje</strong>. Veja o resumo abaixo:'
-           '</p>' if lembrete_prazo else
+           + ('Sua inscrição está <strong>pendente de pagamento</strong> e o prazo termina <strong>hoje</strong>. Veja o resumo abaixo:' if lembrete_prazo.startswith(_hoje()) else 'Sua inscrição está <strong>pendente de pagamento</strong>. Veja o resumo abaixo:')
+           + '</p>' if lembrete_prazo else
            '<p style="margin:0 0 18px;font-size:14px;color:#2b3a30;line-height:1.6">'
            'Sua <strong>inscrição foi realizada com sucesso</strong>. Veja o resumo abaixo:'
            '</p>') +
@@ -274,7 +279,7 @@ def build_inscricao_email_html(*, nome: str, cpf: str, protocolo: str, cargo: st
         f'{_button("Pagar inscrição", (pagamento_url + "?cpf=" + re.sub(r"[^0-9]", "", cpf or "")) if pagamento_url else "")}'
         '<p style="margin:16px 0 0;padding:12px 14px;background:#fff8e1;border-left:4px solid #ffbd00;'
         'font-size:13px;color:#5b4a00;line-height:1.5">'
-        f'As inscrições encerram-se em <strong>{escape(PRAZO)}</strong>. '
+        'As inscrições encerram-se em <strong>29/10/2026, às 23h59</strong> e o pagamento da taxa pode ser feito até <strong>30/10/2026</strong> (horário de Brasília). '
         'A inscrição só é confirmada após o pagamento.'
         '</p>'
     )
