@@ -1,0 +1,21 @@
+{
+  "summary": "Frontend-only retest of the header 'Área do Candidato' button after the 992-1199px compact CSS fix (chrome.css, seduc-theme.js V=31). 48/48 desktop runs PASS: 6 pages (/, /analista.html, /assistente-administrativo.html, /termos.html?c=assistente, /termos.html?c=analista, /inscricao.html) x 8 viewports (992, 1024, 1100, 1155, 1199, 1280, 1536@dsf1.25, 1920), each in a fresh anonymous context. In every run the button is fully inside the viewport (e.g. 992: L=780 R=976; 1024: R=1008; 1155: R=1139; 1199: R=1183; 1920: R=1890), scrollWidth == viewport (no horizontal scroll), and a real mouse click at the center navigated to /minhas-inscricoes.html. Mobile 390 (touch): 6/6 PASS, hamburger opens, Área do Candidato tap navigates, no horizontal scroll. Header at 1024 and 1920 (home, analista, termos, inscricao): no overlapping header items (checked with bounding boxes), legible. Regression /minhas-inscricoes.html: CPF mask OK, '123' -> 'Informe um CPF válido com 11 dígitos.', non-existent CPF 111.444.777-35 -> 'Nenhuma inscrição encontrada para este CPF.'",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Header at 1024px", "issues": ["Readable and no overlap, but nav labels wrap to 2-3 lines (e.g. 'CONCURSOS / PROCESSOS / SELETIVOS') and the logo to 'INÍCIO' / 'FALE CONOSCO' to button gaps are tight (~10px). Cosmetic only."]},
+      {"screen": "/minhas-inscricoes.html footer", "issues": ["The dark right footer block starts about 20px above the left blue block (uneven top edge). Cosmetic, pre-existing."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": ["Unchanged from iteration_63: /api/inscricao/resumo/{cpf} exposes name/cargo by CPF alone; minhas-inscricoes CPF has no check-digit validation."],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (skipped)", "frontend": "100%"},
+  "seed_data_creation": "None. No registrations created.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Use page.context.browser.new_context per run; keep batches to about 18 page loads per browser_automation call to avoid the tool timeout. Close the home modal with aviso-importante-ok. Header button: [data-testid=header-area-candidato-btn] in light DOM or in #seduc-header-host shadowRoot. Mobile: [data-testid=mobile-menu-toggle]. CPF page testids: busca-cpf-input, busca-cpf-btn, busca-cpf-msg, btn-voltar."
+}

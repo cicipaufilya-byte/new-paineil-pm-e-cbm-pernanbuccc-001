@@ -48,13 +48,14 @@ h1.t{color:var(--ink);font-size:26px;font-weight:800;margin:0 0 6px;padding:0 4p
 <div class="wrap">
  <div class="card"><div class="edhead"><h3>SEAD/AP 2026</h3><p class="vn-sub">Secretaria de Estado da Administração do Amapá</p></div></div>
  <h1 class="t">&Aacute;rea do Candidato</h1>
- <p class="sub">Consulte sua inscri&ccedil;&atilde;o pelo CPF ou clique na inscri&ccedil;&atilde;o para ver os detalhes e o pagamento.</p>
+<p class="sub" id="sub-txt">Consulte sua inscri&ccedil;&atilde;o pelo CPF ou clique na inscri&ccedil;&atilde;o para ver os detalhes e o pagamento.</p>
  <form class="busca" id="busca-cpf" data-testid="busca-cpf-form">
   <label for="cpf-busca">CPF do candidato</label>
   <div class="f"><input id="cpf-busca" data-testid="busca-cpf-input" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" required><button type="submit" data-testid="busca-cpf-btn">Consultar</button></div>
   <div class="msg" id="busca-msg" data-testid="busca-cpf-msg"></div>
  </form>
  <div id="lista"></div>
+ <a href="#" id="outro-cpf" data-testid="btn-consultar-outro-cpf" style="display:none;margin-top:14px;color:#3576fb;font-weight:700;font-size:14px;text-decoration:none">Consultar outra inscrição pelo CPF</a><br>
  <a class="back" href="/" data-testid="btn-voltar">&larr; Voltar</a>
 </div>
 <script>
@@ -76,10 +77,14 @@ h1.t{color:var(--ink);font-size:26px;font-weight:800;margin:0 0 6px;padding:0 4p
     lista.innerHTML='';lista.appendChild(el);
   }
   var d={};try{d=JSON.parse(localStorage.getItem('inscricao_dados')||'{}');}catch(e){}
-  if(d&&(d.CPF||d.NOME)){
-    card({protocolo:d.__protocolo,nome:d.NOME,cpf:d.CPF,cargo:d.__vaga_label||d.VAGA,taxa:d.__taxa},'/inscricao-realizada.html');
+  var inp=document.getElementById('cpf-busca'),msg=document.getElementById('busca-msg'),form=document.getElementById('busca-cpf');
+  if(d&&d.CPF&&(d.__protocolo||d.__finalizado_ok)){
+    card({protocolo:d.__protocolo,nome:d.NOME,cpf:d.CPF,cargo:d.__vaga_label||d.VAGA,taxa:d.__taxa},'/pagamento-pix.html');
+    form.style.display='none';
+    document.getElementById('sub-txt').textContent='Esta é a inscrição feita neste navegador. Clique nela para ver os detalhes e o pagamento.';
+    var lk=document.getElementById('outro-cpf');lk.style.display='inline-block';
+    lk.addEventListener('click',function(e){e.preventDefault();form.style.display='block';lk.style.display='none';inp.focus();});
   }
-  var inp=document.getElementById('cpf-busca'),msg=document.getElementById('busca-msg');
   inp.addEventListener('input',function(){var v=inp.value.replace(/\D/g,'').slice(0,11);inp.value=v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2');});
   document.getElementById('busca-cpf').addEventListener('submit',function(e){
     e.preventDefault();msg.style.display='none';
