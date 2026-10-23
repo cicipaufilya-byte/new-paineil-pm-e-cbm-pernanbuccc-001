@@ -845,7 +845,7 @@ h2.tituloPagina span { border-bottom:0 !important; text-indent:0 !important; pad
               __vaga_label: j.cargo_titulo||'', __cargo_titulo: j.cargo_titulo||'',
               __cargo_codigo: j.cargo_codigo||'', VAGA: j.cargo_codigo||'',
               __valor: valor, __taxa: j.taxa || ('R$ ' + valor.toFixed(2).replace('.',',')),
-              __protocolo: j.protocolo||'', __concurso: j.concurso||''
+              __protocolo: j.protocolo||'', __concurso: j.concurso||'', __finalizado_ok: true
             };
             try{ localStorage.setItem('inscricao_dados', JSON.stringify(dados)); }catch(_){}
           }

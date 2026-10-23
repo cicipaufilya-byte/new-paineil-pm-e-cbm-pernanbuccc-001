@@ -1,0 +1,28 @@
+{
+  "summary": "Frontend-only retest of /minhas-inscricoes.html?v=2 after the iteration_65 fixes (1920x1080). All 4 requested scenarios PASS. (1) Same-browser storage with __protocolo and __finalizado_ok: the CPF form is hidden and 1 card shows (Nº 2026224725, TESTE, 529.982.247-25, Analista Administrativo, R$ 120,00). The browser-specific subtitle and the btn-consultar-outro-cpf link are visible, and clicking the card goes to /inscricao-realizada.html. (2) btn-consultar-outro-cpf: the form appears, the link hides, focus goes to cpf-busca, and #sub-txt reads 'Consulte sua inscrição pelo CPF.' (3) CPF search for a registration created via POST /api/track/registration (11144477735, Analista Jurídico, finalized): the input mask works, the card shows the CPF formatted as '111.444.777-35', and clicking it navigates to /pagamento-pix.html?cpf=11144477735, which then location.replace's to /pagamento-pix.html. Searching a nonexistent CPF shows 'Nenhuma inscrição encontrada para este CPF.' and a short CPF shows a validation message. (4) Partial storage (no __protocolo, no __finalizado_ok): form shown, 0 cards, link hidden. Side effect found: opening pagamento-pix.html?cpf=X overwrites localStorage inscricao_dados with X's data (no __finalizado_ok, __protocolo ''). The browser's own inscription card then disappears from the Área do Candidato.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "pagamento-pix.html (line ~850) + minhas-inscricoes.html", "issue": "After a CPF search, clicking the card opens pagamento-pix.html?cpf=OTHER, which overwrites localStorage inscricao_dados with the other CPF's summary (without __finalizado_ok and with __protocolo ''). Coming back to /minhas-inscricoes.html no longer shows the same-browser card; the form shows instead. The user's own finalized registration in that browser is lost from storage.", "selector": "[data-testid=card-inscricao]", "priority": "LOW/MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/minhas-inscricoes.html with no card", "issues": ["The default #sub-txt says '...ou clique na inscrição para ver os detalhes...' even when no inscription card is shown. Consider 'Consulte sua inscrição pelo CPF.' as the default."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Optional: on pagamento-pix.html, when the ?cpf lookup differs from the stored CPF, don't overwrite a finalized inscricao_dados (e.g., store it under a separate key, or keep __finalizado_ok/__protocolo). Alternatively, set __finalizado_ok:true and the real protocolo, since the API only returns existing inscricoes.",
+    "Optional: change the default #sub-txt text when no card is present"
+  ],
+  "critical_code_review_comments": [
+    "The API search card uses the protocolo fallback '2026'+last6 digits when inscricoes.protocolo is empty (registrations created via track/registration have no protocolo). This may not match the real protocol.",
+    "inscricao-realizada.html receives no CPF param and relies on localStorage only. Fine for the same-browser case."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (skipped)", "frontend": "100% of requested scenarios"},
+  "seed_data_creation": "Created a registration for CPF 11144477735 (TEST AREA CPF) via POST /api/track/registration, then deleted it from inscricoes, cadastros and registrations. /api/inscricao/resumo/11144477735 now returns 404. localStorage was simulated per test and removed.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Use /minhas-inscricoes.html?v=2. To simulate the same-browser case, set localStorage inscricao_dados before goto. Note that visiting pagamento-pix.html?cpf=X rewrites inscricao_dados. Clean up by cpf across all collections with mongosh (test_database)."
+}
