@@ -1,0 +1,30 @@
+{
+  "summary": "Frontend only. Tested termos.html?c=analista/assistente reload, sampling every 100ms with cache disabled, at 1920x1080 and 390x844, both without throttling and with throttling. Once the page has finished loading (steady state) everything passes: the gap between the header and the h2 is 28px on desktop and 18px on mobile, the header stays fixed while scrolling, the mobile hamburger opens, the checkbox enables Continuar and it goes to /inscricao.html, and inscricao/dados-inscricao/minhas-inscricoes have no double spacing. The loading flash is NOT fixed. The body is shown while body padding-top is still the height of the UNSTYLED header (266px or 340px) instead of the real height (170px desktop, 90px mobile). This gives a 124-200px empty gap. Without throttling it lasts about 200-300ms. Under Fast 3G (latency 562ms, 1.44Mbps) the gap STAYS (340px padding, about 200px gap) and the text shows in Arial, which is exactly what the user reported.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "seduc-theme.js pad()/show()", "issue": "pad() runs synchronously in build() BEFORE chrome.css (inside the shadow root) loads. At that point the header has no styles: offsetHeight is 266px (or 340px on slow networks) and becomes body padding-top. show() (on chrome.css load) removes vn-wait WITHOUT calling pad() again. The only re-measurement is setTimeout(pad,400). Result: the body is revealed with a huge gap (no throttling: padTop 266 vs header 170, h2 294px from the top instead of 198px, about 2-3 frames; mobile padTop 266 vs 90, h2 at 284px instead of 108px). On Fast 3G the 400ms timeout also fires before the CSS loads, and the padding stays at 340px with no recalculation (only on resize). The gap is permanent.", "selector": "#seduc-header-host / body padding-top", "priority": "HIGH"},
+      {"component": "seduc-theme.js show() fonts", "issue": "document.fonts.ready resolves right away because fonts.css (inserted dynamically at the same moment) has not been parsed/requested yet, so no fonts are loading. On Fast 3G the body appears in Arial and then switches to Silka (font swap visible).", "selector": "html.vn-wait", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [
+    "In show(): call pad() BEFORE removing vn-wait. Ideally also use a ResizeObserver on #seduc-header-host that calls pad(), and drop the reliance on setTimeout(pad,400).",
+    "Do not compute the padding while chrome.css has not loaded (ln.onload). Remove vn-wait only after chrome.css load + pad().",
+    "Fonts: wait for the load event of the link#ceb-fonts (fonts.css) and then document.fonts.load('1em Silka') (or check that fonts.css is loaded before using fonts.ready), still with the 1.2s cap. Alternatively, move <link fonts.css> and flow.css statically into the <head> of termos.html with font preload.",
+    "Retest under Fast 3G (latency 562ms) at 1920 and 390."
+  ],
+  "critical_code_review_comments": [
+    "pad() measures offsetHeight of an unstyled shadow host; it needs to run again after the shadow CSS loads.",
+    "document.fonts.ready is not reliable when the font stylesheet is injected in the same tick."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "80% (steady state and regression OK; load flash/gap still present)"},
+  "seed_data_creation": "none; no registrations were created",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Use a CDP session: Network.setCacheDisabled + emulateNetworkConditions(latency 562, 1.44Mbps). Sample every 100ms: html.vn-wait, body.style.paddingTop, #seduc-header-host bottom, h2 'Secretaria de Estado' top. Pass criterion: when vn-wait is removed, h2top - hdrBottom <= 40 and the font is Silka.",
+  "rca of the issue": "Order in build(): host() creates the shadow host with <link chrome.css> -> pad() measures it right away (unstyled, ~266-340px) -> chrome.css loads -> show() shows the header and removes vn-wait after fonts.ready (already resolved) -> the body appears with the wrong padding -> the 400ms setTimeout fixes it only if the CSS has already loaded by then; otherwise the padding stays wrong permanently. Repro: Fast 3G + cache disabled, F5 on /termos.html?c=analista. Mitigation: call pad() inside show() before done(), and add a ResizeObserver."
+}
