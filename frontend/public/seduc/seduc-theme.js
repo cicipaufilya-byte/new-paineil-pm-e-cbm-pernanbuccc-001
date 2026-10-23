@@ -1,5 +1,5 @@
 (function(){
-var V='36';
+var V='37';
 function fontsLink(){
  if(document.getElementById('ceb-fonts'))return;
  var l=document.createElement('link');l.id='ceb-fonts';l.rel='stylesheet';l.href='/idcap/fonts.css?v='+V;document.head.appendChild(l);
@@ -12,7 +12,7 @@ function host(id,html,cls,atTop){
  var r=h.attachShadow({mode:'open'});
  r.innerHTML='<link rel="stylesheet" href="/idcap/chrome.css?v='+V+'"><div class="sfbody '+cls+'">'+html+'</div>';
  var ln=r.querySelector('link');
- function show(){h.style.visibility='visible';if(atTop)document.documentElement.classList.remove('vn-wait');}
+ function show(){h.style.visibility='visible';if(atTop){var done=function(){document.documentElement.classList.remove('vn-wait');};var fr=document.fonts&&document.fonts.ready;if(fr){Promise.race([fr,new Promise(function(r){setTimeout(r,1200);})]).then(done);}else done();}}
  ln.addEventListener('load',show);
  ln.addEventListener('error',function(){h.remove();document.documentElement.classList.remove('vn-wait');});
  setTimeout(show,2500);
@@ -52,7 +52,7 @@ function build(p){
  if(document.getElementById('seduc-header-host'))return;
  fontsLink();
  var hr=host('seduc-header-host',p.h,p.cls,true);
- (function(){var hh=document.getElementById('seduc-header-host');function pad(){document.body.style.setProperty('padding-top',hh.offsetHeight+'px','important');}pad();window.addEventListener('resize',pad);setTimeout(pad,400);})();
+ (function(){var hh=document.getElementById('seduc-header-host');function pad(){hh.style.setProperty('position','fixed','important');hh.style.setProperty('top','0','important');hh.style.setProperty('left','0','important');hh.style.setProperty('right','0','important');hh.style.setProperty('z-index','9990','important');document.body.style.setProperty('padding-top',hh.offsetHeight+'px','important');}pad();window.addEventListener('resize',pad);setTimeout(pad,400);})();
  if(/minhas-inscricoes/.test(location.pathname)){hr.querySelectorAll('.header__action-follow-button,[data-testid=header-minhas-inscricoes-btn]').forEach(function(el){el.remove();});}
  menu(hr);
  if(/minhas-inscricoes/.test(location.pathname)){
