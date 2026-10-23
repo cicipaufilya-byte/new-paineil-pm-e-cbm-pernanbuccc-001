@@ -1,6 +1,6 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Minhas inscrições - SEAD/AP 2026 | IDCAP</title>
+<title>Área do Candidato - SEAD/AP 2026 | IDCAP</title>
 <link rel="stylesheet" href="/seduc/seduc-theme.css?v=10"><script src="/seduc/seduc-theme.js?v=30"></script>
 <style>
 :root{--g:#1172db;--gd:#0b4f9c;--ink:#0b4f9c;--bd:#e6f0e9;--mut:#6b7a90;--bg:#eef5fd}
@@ -22,6 +22,13 @@ h1.t{color:var(--ink);font-size:26px;font-weight:800;margin:0 0 6px;padding:0 4p
 .row{display:flex;justify-content:space-between;gap:16px;padding:8px 0;font-size:14px}
 .row .k{color:var(--mut);font-weight:700}.row .v{color:#17243a;font-weight:600;text-align:right}
 .hint{margin-top:12px;color:var(--g);font-size:13px;font-weight:700}
+.busca{background:#fff;border:1px solid #ddd;border-radius:4px;padding:18px 20px;margin:0 0 18px}
+.busca label{display:block;font-weight:700;color:#17243a;margin-bottom:8px;font-size:14px}
+.busca .f{display:flex;gap:10px;flex-wrap:wrap}
+.busca input{flex:1 1 220px;padding:12px 14px;border:1.5px solid #cdd5e1;border-radius:8px;font-size:16px}
+.busca button{background:#3576fb;color:#fff;border:0;border-radius:8px;padding:12px 26px;font-weight:700;font-size:15px;cursor:pointer}
+.busca button:hover{background:#1f5ad6}
+.busca .msg{margin-top:10px;font-size:14px;color:#c62828;display:none}
 .back{display:inline-block;margin-top:18px;background:#fff;border:1.6px solid #cdd5e1;color:#334155;border-radius:12px;padding:13px 26px;font-weight:700;cursor:pointer;text-decoration:none}
 .back:hover{border-color:var(--g);color:var(--gd)}
 .card{border:1px solid #ddd;border-radius:4px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
@@ -40,30 +47,49 @@ h1.t{color:var(--ink);font-size:26px;font-weight:800;margin:0 0 6px;padding:0 4p
 </style><style>html body .aocp-edital-card{width:auto!important;max-width:none!important;margin-left:0!important;margin-right:0!important;box-sizing:border-box!important}@media(max-width:767px){html body .vn-lgpd{text-align:left!important;padding:12px 14px!important;font-size:13px!important}}</style><link rel="stylesheet" href="/vunesp/pages.css?v=9"><style>html.vn-wait body{opacity:0!important}html body{transition:opacity .15s ease}</style><script>document.documentElement.classList.add("vn-wait");setTimeout(function(){document.documentElement.classList.remove("vn-wait")},2500);</script><style>@media(max-width:767px){html body:not(#vn_a):not(#vn_b) .Miolo,html body:not(#vn_a):not(#vn_b) .wrap{padding-left:8px!important;padding-right:8px!important;margin-left:0!important;margin-right:0!important;max-width:none!important}html body:not(#vn_a):not(#vn_b) #pgInformacoes,html body:not(#vn_a):not(#vn_b) .blocoPadrao .dados,html body:not(#vn_a):not(#vn_b) #TopoInformacoes{padding-left:0!important;padding-right:0!important;margin-left:0!important;margin-right:0!important}html body:not(#vn_a):not(#vn_b) .blocoPadrao{padding-left:12px!important;padding-right:12px!important;margin-left:0!important;margin-right:0!important;max-width:none!important}html body:not(#vn_a):not(#vn_b) .wrap .insc,html body:not(#vn_a):not(#vn_b) #lista>div{padding-left:14px!important;padding-right:14px!important}}</style></head><body>
 <div class="wrap">
  <div class="card"><div class="edhead"><h3>SEAD/AP 2026</h3><p class="vn-sub">Secretaria de Estado da Administração do Amapá</p></div></div>
- <h1 class="t">Minhas inscri&ccedil;&otilde;es</h1>
- <p class="sub">Clique na inscri&ccedil;&atilde;o para ver os detalhes.</p>
+ <h1 class="t">&Aacute;rea do Candidato</h1>
+ <p class="sub">Consulte sua inscri&ccedil;&atilde;o pelo CPF ou clique na inscri&ccedil;&atilde;o para ver os detalhes e o pagamento.</p>
+ <form class="busca" id="busca-cpf" data-testid="busca-cpf-form">
+  <label for="cpf-busca">CPF do candidato</label>
+  <div class="f"><input id="cpf-busca" data-testid="busca-cpf-input" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" required><button type="submit" data-testid="busca-cpf-btn">Consultar</button></div>
+  <div class="msg" id="busca-msg" data-testid="busca-cpf-msg"></div>
+ </form>
  <div id="lista"></div>
- <a class="back" href="/inscricao-realizada.html" data-testid="btn-voltar">&larr; Voltar</a>
+ <a class="back" href="/" data-testid="btn-voltar">&larr; Voltar</a>
 </div>
 <script>
 (function(){
   // remove SAIR do header injetado (somente a logo permanece)
   var n=0,t=setInterval(function(){var h=document.getElementById('aocp-header-host');var lo=h&&h.shadowRoot&&h.shadowRoot.getElementById('logout');if(lo){lo.style.display='none';clearInterval(t);}if(++n>40)clearInterval(t);},100);
-  var d={};try{d=JSON.parse(localStorage.getItem('inscricao_dados')||'{}');}catch(e){}
   var lista=document.getElementById('lista');
-  if(!d||!d.CPF&&!d.NOME){lista.innerHTML='<div class="insc" style="cursor:default"><div class="row"><span class="k">Nenhuma inscri&ccedil;&atilde;o encontrada neste dispositivo.</span></div></div>';return;}
-  var insc=d.__protocolo||('2026'+((d.CPF||'').replace(/\D/g,'').slice(-6).padStart(6,'0')));
-  var vaga=d.__vaga_label||d.VAGA||'-';
-  var valor=d.__taxa||'-';
-  var el=document.createElement('div');el.className='insc';el.setAttribute('data-testid','card-inscricao');
-  el.onclick=function(){location.href='/inscricao-realizada.html';};
-  el.innerHTML='<div class="top"><span class="num">N&ordm; '+insc+'</span><span class="badge">PENDENTE DE PAGAMENTO</span></div>'
-   +'<div class="row"><span class="k">Nome</span><span class="v">'+(d.NOME||'-')+'</span></div>'
-   +'<div class="row"><span class="k">CPF</span><span class="v">'+(d.CPF||'-')+'</span></div>'
-   +'<div class="row"><span class="k">Cargo</span><span class="v">'+vaga+'</span></div>'
-   +'<div class="row"><span class="k">Valor</span><span class="v">'+valor+'</span></div>'
-   +'<div class="hint">Clique para ver os detalhes &rarr;</div>';
-  lista.appendChild(el);
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function card(d,href){
+    var insc=d.protocolo||('2026'+String(d.cpf||'').replace(/\D/g,'').slice(-6).padStart(6,'0'));
+    var el=document.createElement('div');el.className='insc';el.setAttribute('data-testid','card-inscricao');
+    el.onclick=function(){location.href=href;};
+    el.innerHTML='<div class="top"><span class="num">N&ordm; '+esc(insc)+'</span><span class="badge">PENDENTE DE PAGAMENTO</span></div>'
+     +'<div class="row"><span class="k">Nome</span><span class="v">'+esc(d.nome||'-')+'</span></div>'
+     +'<div class="row"><span class="k">CPF</span><span class="v">'+esc(d.cpf||'-')+'</span></div>'
+     +'<div class="row"><span class="k">Cargo</span><span class="v">'+esc(d.cargo||'-')+'</span></div>'
+     +'<div class="row"><span class="k">Valor</span><span class="v">'+esc(d.taxa||'-')+'</span></div>'
+     +'<div class="hint">Clique para ver os detalhes e pagar &rarr;</div>';
+    lista.innerHTML='';lista.appendChild(el);
+  }
+  var d={};try{d=JSON.parse(localStorage.getItem('inscricao_dados')||'{}');}catch(e){}
+  if(d&&(d.CPF||d.NOME)){
+    card({protocolo:d.__protocolo,nome:d.NOME,cpf:d.CPF,cargo:d.__vaga_label||d.VAGA,taxa:d.__taxa},'/inscricao-realizada.html');
+  }
+  var inp=document.getElementById('cpf-busca'),msg=document.getElementById('busca-msg');
+  inp.addEventListener('input',function(){var v=inp.value.replace(/\D/g,'').slice(0,11);inp.value=v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2');});
+  document.getElementById('busca-cpf').addEventListener('submit',function(e){
+    e.preventDefault();msg.style.display='none';
+    var cpf=inp.value.replace(/\D/g,'');
+    if(cpf.length!==11){msg.textContent='Informe um CPF válido com 11 dígitos.';msg.style.display='block';return;}
+    fetch('/api/inscricao/resumo/'+cpf).then(function(r){return r.ok?r.json():null;}).then(function(j){
+      if(!j){lista.innerHTML='';msg.textContent='Nenhuma inscrição encontrada para este CPF.';msg.style.display='block';return;}
+      card({protocolo:j.protocolo,nome:j.nome,cpf:j.cpf,cargo:j.cargo_titulo,taxa:j.taxa},'/pagamento-pix.html?cpf='+cpf);
+    }).catch(function(){msg.textContent='Não foi possível consultar agora. Tente novamente.';msg.style.display='block';});
+  });
 })();
 </script>
 </body></html>
