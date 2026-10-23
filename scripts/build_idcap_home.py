@@ -140,6 +140,7 @@ def externalize(s):
 
 def finish(s, extra):
     s = externalize(s)
+    s = re.sub(r'/\*!\s*\* Bootstrap.*?\*/', '', s, flags=re.S)
     s = re.sub(r'\s*target=_blank(?! rel=noopener)', '', s)
     s = re.sub(r'href="?https?://[^\s>"]+"?', 'href=#', s)
     s = re.sub(r'action=/index/todos/', 'action=#', s)
