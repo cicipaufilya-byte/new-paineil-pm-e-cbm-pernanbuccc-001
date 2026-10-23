@@ -1,0 +1,108 @@
+import re
+
+SRC = '/app/memory/idcap/source.html'
+DST = '/app/frontend/public/inicio.html'
+
+s = open(SRC, encoding='utf-8').read()
+
+s = re.sub(r'<meta http-equiv=content-security-policy[^>]*>', '', s, flags=re.I)
+s = re.sub(r'<!--\s*Page saved with SingleFile.*?-->', '', s, flags=re.S)
+s = re.sub(r'\s*rel=canonical href=https://idcap\.selecao\.net\.br/informacoes/263/', '', s)
+
+s = s.replace('<a href="https://idcap.selecao.net.br/login/sair/?redir=%2Ftermo%2F263%2F" class=information__btn>',
+              '<a href=/termos.html id=btn-inscreva-se class="information__btn js-inscricao" data-testid=home-fazer-inscricao-btn>')
+s = s.replace('<a href=https://idcap.selecao.net.br/painel/ class=default__btn>',
+              '<a href=/minhas-inscricoes.html class=default__btn data-testid=header-area-candidato-btn>')
+s = s.replace('<a href=https://idcap.selecao.net.br/painel/>',
+              '<a href=/minhas-inscricoes.html data-testid=footer-area-candidato-link>')
+s = s.replace('<a href=https://idcap.selecao.net.br/>', '<a href=/ class=home-menu-link>')
+s = s.replace('<a class=header__btn>', '<a class=header__btn id=menu-toggle data-testid=mobile-menu-toggle>')
+s = s.replace('<a href=#back-to-top>', '<a href=# id=back-to-top-link data-testid=back-to-top-link>')
+s = s.replace('<a href=javascript:void(0)>\n', '<a href=# class=js-action>\n')
+
+s = re.sub(r'\s*target=_blank', '', s)
+s = re.sub(r'href="?https?://[^\s>"]+"?', 'href=#', s)
+
+s = re.sub(r'<div vw class=enabled>.*?</div>\s*</div>\s*</div>', '', s, flags=re.S)
+s = re.sub(r'<div id=vlibras-access-wrapper>.*?</template></div>', '', s, flags=re.S)
+
+logo = re.search(r'<div class=header__logo>\s*<a[^>]*>\s*<img src="(data:[^"]+)"', s).group(1)
+
+EXTRA = '''
+<style>
+a[href="#"]{cursor:default}
+.menu-on .header__toggle{opacity:1!important;visibility:visible!important}
+.menu-on .header__toggle .toggle__content{margin:0!important}
+#home-loader{position:fixed;inset:0;z-index:2147483647;background:rgba(255,255,255,.94);display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+#home-loader.on{display:flex}
+#home-loader .spin{width:52px;height:52px;border:5px solid #e8e8e8;border-top-color:#3576fb;border-radius:50%;animation:hlspin .8s linear infinite}
+#home-loader p{margin:0;font-size:16px;color:#253654;font-weight:600;letter-spacing:.3px}
+@keyframes hlspin{to{transform:rotate(360deg)}}
+dialog#aviso-modal::backdrop{background:rgba(10,20,40,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+dialog#aviso-modal{border:0;padding:0;max-width:520px;width:calc(100% - 40px);background:transparent;overflow:visible}
+dialog#aviso-modal[open]{animation:avpop .28s cubic-bezier(.2,.8,.25,1)}
+@keyframes avpop{from{transform:translateY(14px) scale(.97);opacity:0}to{transform:none;opacity:1}}
+#aviso-modal .av-card{background:#fff;border-radius:22px;box-shadow:0 24px 70px rgba(0,0,0,.35);padding:38px 34px 34px;text-align:center}
+#aviso-modal img.av-logo{display:block;margin:0 auto 20px;height:48px;width:auto}
+#aviso-modal h2{margin:0 0 16px;font-size:28px;font-weight:800;color:#1d3a6e;font-family:Arial,Helvetica,sans-serif}
+#aviso-modal p{margin:0 0 28px;font-size:16px;line-height:1.6;color:#30415a;font-family:Arial,Helvetica,sans-serif}
+#aviso-modal .av-btn{appearance:none;border:0;cursor:pointer;background:#3576fb;color:#fff;font-size:17px;font-weight:700;font-family:Arial,Helvetica,sans-serif;padding:14px 40px;border-radius:999px;transition:background .15s,transform .15s}
+#aviso-modal .av-btn:hover{background:#1f5ad6;transform:translateY(-1px)}
+@media(max-width:480px){#aviso-modal .av-card{padding:30px 22px 26px}#aviso-modal h2{font-size:23px}#aviso-modal p{font-size:15px}}
+</style>
+<div id=home-loader aria-hidden=true data-testid=home-loader><div class=spin></div><p>Carregando...</p></div>
+<dialog id="aviso-modal" aria-labelledby="aviso-modal-title" data-testid="aviso-importante-modal">
+  <div class="av-card">
+    <img class="av-logo" src="__LOGO__" alt="Instituto IDCAP" />
+    <h2 id="aviso-modal-title">Aviso importante</h2>
+    <p>As inscrições para o Concurso Público 001/2026 da Secretaria de Estado da Administração do Amapá (SEAD) encerram-se no dia <strong>29/10/2026</strong>, às <strong>23h59</strong> (horário de Brasília).</p>
+    <button type="button" class="av-btn" id="aviso-modal-ok" data-testid="aviso-importante-ok">OK, entendi</button>
+  </div>
+</dialog>
+<script>
+(function(){
+  try {
+    var v = localStorage.getItem('visitor_id');
+    if(!v){ v = 'v_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,10); localStorage.setItem('visitor_id', v); }
+    fetch('/api/track/access', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ page: window.location.pathname, user_agent: navigator.userAgent, extra: { visitor_id: v } })
+    }).catch(function(){});
+  } catch(e) {}
+  var root = document.documentElement, loader = document.getElementById('home-loader');
+  function setMenu(on){ root.classList.toggle('menu-on', on); }
+  function go(url){ setMenu(false); loader.classList.add('on'); setTimeout(function(){ window.location.href = url; }, 2000); }
+  function bind(sel, url){ document.querySelectorAll(sel).forEach(function(a){ a.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); go(url); }); }); }
+  bind('#btn-inscreva-se, .js-inscricao', '/termos.html');
+  bind('a.home-menu-link', '/');
+  bind('a[href="/minhas-inscricoes.html"]', '/minhas-inscricoes.html');
+  document.querySelectorAll('a[href="#"]').forEach(function(a){ a.addEventListener('click', function(e){ e.preventDefault(); }); });
+  var acts = document.querySelectorAll('a.js-action');
+  if (acts[0]) acts[0].addEventListener('click', function(){ history.back(); });
+  if (acts[1]) acts[1].addEventListener('click', function(){ window.print(); });
+  document.getElementById('back-to-top-link').addEventListener('click', function(){ window.scrollTo({top:0, behavior:'smooth'}); });
+  document.getElementById('menu-toggle').addEventListener('click', function(){ setMenu(!root.classList.contains('menu-on')); });
+  document.querySelector('.header__toggle').addEventListener('click', function(e){ if (e.target === this) setMenu(false); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') setMenu(false); });
+  window.addEventListener('pageshow', function(ev){ if (ev.persisted) loader.classList.remove('on'); });
+})();
+(function(){
+  var KEY='idcap_aviso_modal_shown';
+  try{ if(sessionStorage.getItem(KEY)==='1') return; }catch(e){}
+  var dlg=document.getElementById('aviso-modal'), btn=document.getElementById('aviso-modal-ok');
+  function mark(){ try{sessionStorage.setItem(KEY,'1');}catch(e){} }
+  function close(){ mark(); if(dlg.open) dlg.close(); }
+  btn.addEventListener('click', close);
+  dlg.addEventListener('click', function(e){ if(e.target===dlg) close(); });
+  setTimeout(function(){ mark(); if(typeof dlg.showModal==='function') dlg.showModal(); else dlg.setAttribute('open',''); }, 300);
+})();
+</script>
+'''.replace('__LOGO__', logo)
+
+i = s.rfind('</body>')
+s = (s[:i] + EXTRA + s[i:]) if i != -1 else (s + EXTRA + '</body></html>')
+
+open(DST, 'w', encoding='utf-8').write(s)
+left = re.findall(r'href="?(https?://[^\s>"]+)', s)
+print('written', len(s), 'external hrefs left:', left)

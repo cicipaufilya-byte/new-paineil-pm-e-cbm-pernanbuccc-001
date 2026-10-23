@@ -270,3 +270,9 @@ Pendências/observações: imagem decorativa do login do painel (Tartaruga Ninja
 - Confirmação mostra MACEIÓ/AL com acento.
 - Arquivos órfãos movidos (não apagados) p/ /app/_legacy_public_backup: edital-inspetor/especialista, modelo-aocp, brasao-amapa, previews, seduc/comunicados + logos antigas, vunesp/docs + logo, 4 testes backend antigos.
 - Mantido: menu oficial Cebraspe (Acesso à universidade/Vestibular/Educação), nomes internos de classes/pastas (seduc/, vunesp/, fgv-*, aocp-*) — invisíveis.
+
+## Update 2026-10 — Nova página inicial IDCAP (SEAD Amapá)
+- public/inicio.html substituído pela página IDCAP enviada pelo usuário (SingleFile). Gerador: /app/scripts/build_idcap_home.py (fonte: /app/memory/idcap/source.html). Backup da home SEFAZ: /app/memory/backups/inicio.sefaz.backup.html.
+- Removidos: todos os links externos (viram href=#), canonical, comentário SingleFile, meta CSP (bloqueava /api/track/access), widget VLibras.
+- Conexões com o painel mantidas: POST /api/track/access (visitor_id), "Inscrição Online" -> loader 2s -> /termos.html (id btn-inscreva-se), "Área do candidato" -> /minhas-inscricoes.html, Início/logo -> /, modal "Aviso importante" (sessionStorage idcap_aviso_modal_shown, fim 29/10/2026 23h59), menu mobile (classe menu-on), Voltar/Imprimir/Voltar ao topo.
+- PDFs de Publicações estão sem link (eram externos).
