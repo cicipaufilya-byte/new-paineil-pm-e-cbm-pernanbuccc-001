@@ -173,6 +173,8 @@ def build_home():
                   '<a href=/assistente-administrativo.html class=js-nav data-testid=card-sead-assistente>')
     s = s.replace('<a href=https://idcap.selecao.net.br/informacoes/262/>',
                   '<a href=/analista.html class=js-nav data-testid=card-sead-analista>')
+    s = s.replace('<div class="footer__status footer__item status__opened">Inscrições abertas</div>',
+                  '<div class="footer__status footer__item status__opened" data-testid=card-inscreva-se>Inscreva-se</div>')
     return finish(s, STYLE + NAV_JS + TRACK_JS + MODAL)
 
 
