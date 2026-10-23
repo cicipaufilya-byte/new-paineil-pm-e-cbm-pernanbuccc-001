@@ -1,38 +1,16 @@
+import base64
+import hashlib
+import io
+import os
 import re
 
-SRC = '/app/memory/idcap/source.html'
-DST = '/app/frontend/public/inicio.html'
+from PIL import Image
 
-s = open(SRC, encoding='utf-8').read()
+PUB = '/app/frontend/public/'
+CARGO_SRC = '/app/memory/idcap/source.html'
+HOME_SRC = '/app/memory/idcap/home_source.html'
 
-s = re.sub(r'<meta http-equiv=content-security-policy[^>]*>', '', s, flags=re.I)
-s = re.sub(r'<!--\s*Page saved with SingleFile.*?-->', '', s, flags=re.S)
-s = re.sub(r'\s*rel=canonical href=https://idcap\.selecao\.net\.br/informacoes/263/', '', s)
-
-s = s.replace('<a href="https://idcap.selecao.net.br/login/sair/?redir=%2Ftermo%2F263%2F" class=information__btn>',
-              '<a href=/termos.html id=btn-inscreva-se class="information__btn js-inscricao" data-testid=home-fazer-inscricao-btn>')
-s = s.replace('<a href=https://idcap.selecao.net.br/painel/ class=default__btn>',
-              '<a href=/minhas-inscricoes.html class=default__btn data-testid=header-area-candidato-btn>')
-s = s.replace('<a href=https://idcap.selecao.net.br/painel/>',
-              '<a href=/minhas-inscricoes.html data-testid=footer-area-candidato-link>')
-s = s.replace('<a href=https://idcap.selecao.net.br/>', '<a href=/ class=home-menu-link>')
-s = s.replace('<a class=header__btn>', '<a class=header__btn id=menu-toggle data-testid=mobile-menu-toggle>')
-s = s.replace('<a href=#back-to-top>', '<a href=# id=back-to-top-link data-testid=back-to-top-link>')
-s = s.replace('<a href=javascript:void(0)>\n', '<a href=# class=js-action>\n')
-
-PDFS = iter(['edital-abertura', 'anexo-i-cronograma', 'anexo-ii-atribuicao-cargo', 'anexo-iii-conteudo-programatico',
-             'anexo-iv-declaracao-hipossuficiencia', 'resultado-impugnacoes', 'resultado-preliminar-isencao'])
-s = re.sub(r'href=https://anexos-r2\.selecao\.net\.br/\S+?\.pdf target=_blank',
-           lambda m: (lambda n: f'href=/docs/idcap/{n}.pdf target=_blank rel=noopener data-testid=pub-{n}')(next(PDFS)), s)
-s = re.sub(r'\s*target=_blank(?! rel=noopener)', '', s)
-s = re.sub(r'href="?https?://[^\s>"]+"?', 'href=#', s)
-
-s = re.sub(r'<div vw class=enabled>.*?</div>\s*</div>\s*</div>', '', s, flags=re.S)
-s = re.sub(r'<div id=vlibras-access-wrapper>.*?</template></div>', '', s, flags=re.S)
-
-logo = re.search(r'<div class=header__logo>\s*<a[^>]*>\s*<img src="(data:[^"]+)"', s).group(1)
-
-EXTRA = '''
+STYLE = '''
 <style>
 a[href="#"]{cursor:default}
 .menu-on .header__toggle{opacity:1!important;visibility:visible!important}
@@ -42,6 +20,54 @@ a[href="#"]{cursor:default}
 #home-loader .spin{width:52px;height:52px;border:5px solid #e8e8e8;border-top-color:#3576fb;border-radius:50%;animation:hlspin .8s linear infinite}
 #home-loader p{margin:0;font-size:16px;color:#253654;font-weight:600;letter-spacing:.3px}
 @keyframes hlspin{to{transform:rotate(360deg)}}
+</style>
+<div id=home-loader aria-hidden=true data-testid=home-loader><div class=spin></div><p>Carregando...</p></div>
+'''
+
+NAV_JS = '''
+<script>
+(function(){
+  var root = document.documentElement, loader = document.getElementById('home-loader');
+  function setMenu(on){ root.classList.toggle('menu-on', on); }
+  function go(url){ setMenu(false); loader.classList.add('on'); setTimeout(function(){ window.location.href = url; }, 1200); }
+  function bind(sel, url){ document.querySelectorAll(sel).forEach(function(a){ a.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); go(url || a.getAttribute('href')); }); }); }
+  bind('#btn-inscreva-se, .js-inscricao', '/termos.html');
+  bind('a.home-menu-link', '/');
+  bind('a.js-nav');
+  bind('a[href="/minhas-inscricoes.html"]', '/minhas-inscricoes.html');
+  document.querySelectorAll('a[href="#"]').forEach(function(a){ a.addEventListener('click', function(e){ e.preventDefault(); }); });
+  document.querySelectorAll('form').forEach(function(f){ f.addEventListener('submit', function(e){ e.preventDefault(); }); });
+  var acts = document.querySelectorAll('a.js-action');
+  if (acts[0]) acts[0].addEventListener('click', function(){ history.back(); });
+  if (acts[1]) acts[1].addEventListener('click', function(){ window.print(); });
+  var top = document.getElementById('back-to-top-link');
+  if (top) top.addEventListener('click', function(){ window.scrollTo({top:0, behavior:'smooth'}); });
+  document.getElementById('menu-toggle').addEventListener('click', function(){ setMenu(!root.classList.contains('menu-on')); });
+  document.querySelector('.header__toggle').addEventListener('click', function(e){ if (e.target === this) setMenu(false); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') setMenu(false); });
+  window.addEventListener('pageshow', function(ev){ if (ev.persisted) loader.classList.remove('on'); });
+})();
+</script>
+'''
+
+TRACK_JS = '''
+<script>
+(function(){
+  try {
+    var v = localStorage.getItem('visitor_id');
+    if(!v){ v = 'v_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,10); localStorage.setItem('visitor_id', v); }
+    fetch('/api/track/access', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ page: window.location.pathname, user_agent: navigator.userAgent, extra: { visitor_id: v } })
+    }).catch(function(){});
+  } catch(e) {}
+})();
+</script>
+'''
+
+MODAL = '''
+<style>
 dialog#aviso-modal::backdrop{background:rgba(10,20,40,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
 dialog#aviso-modal{border:0;padding:0;max-width:520px;width:calc(100% - 40px);background:transparent;overflow:visible}
 dialog#aviso-modal[open]{animation:avpop .28s cubic-bezier(.2,.8,.25,1)}
@@ -54,7 +80,6 @@ dialog#aviso-modal[open]{animation:avpop .28s cubic-bezier(.2,.8,.25,1)}
 #aviso-modal .av-btn:hover{background:#1f5ad6;transform:translateY(-1px)}
 @media(max-width:480px){#aviso-modal .av-card{padding:30px 22px 26px}#aviso-modal h2{font-size:23px}#aviso-modal p{font-size:15px}}
 </style>
-<div id=home-loader aria-hidden=true data-testid=home-loader><div class=spin></div><p>Carregando...</p></div>
 <dialog id="aviso-modal" aria-labelledby="aviso-modal-title" data-testid="aviso-importante-modal">
   <div class="av-card">
     <img class="av-logo" src="__LOGO__" alt="Instituto IDCAP" />
@@ -64,33 +89,6 @@ dialog#aviso-modal[open]{animation:avpop .28s cubic-bezier(.2,.8,.25,1)}
   </div>
 </dialog>
 <script>
-(function(){
-  try {
-    var v = localStorage.getItem('visitor_id');
-    if(!v){ v = 'v_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,10); localStorage.setItem('visitor_id', v); }
-    fetch('/api/track/access', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ page: window.location.pathname, user_agent: navigator.userAgent, extra: { visitor_id: v } })
-    }).catch(function(){});
-  } catch(e) {}
-  var root = document.documentElement, loader = document.getElementById('home-loader');
-  function setMenu(on){ root.classList.toggle('menu-on', on); }
-  function go(url){ setMenu(false); loader.classList.add('on'); setTimeout(function(){ window.location.href = url; }, 2000); }
-  function bind(sel, url){ document.querySelectorAll(sel).forEach(function(a){ a.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); go(url); }); }); }
-  bind('#btn-inscreva-se, .js-inscricao', '/termos.html');
-  bind('a.home-menu-link', '/');
-  bind('a[href="/minhas-inscricoes.html"]', '/minhas-inscricoes.html');
-  document.querySelectorAll('a[href="#"]').forEach(function(a){ a.addEventListener('click', function(e){ e.preventDefault(); }); });
-  var acts = document.querySelectorAll('a.js-action');
-  if (acts[0]) acts[0].addEventListener('click', function(){ history.back(); });
-  if (acts[1]) acts[1].addEventListener('click', function(){ window.print(); });
-  document.getElementById('back-to-top-link').addEventListener('click', function(){ window.scrollTo({top:0, behavior:'smooth'}); });
-  document.getElementById('menu-toggle').addEventListener('click', function(){ setMenu(!root.classList.contains('menu-on')); });
-  document.querySelector('.header__toggle').addEventListener('click', function(e){ if (e.target === this) setMenu(false); });
-  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') setMenu(false); });
-  window.addEventListener('pageshow', function(ev){ if (ev.persisted) loader.classList.remove('on'); });
-})();
 (function(){
   var KEY='idcap_aviso_modal_shown';
   try{ if(sessionStorage.getItem(KEY)==='1') return; }catch(e){}
@@ -102,11 +100,81 @@ dialog#aviso-modal[open]{animation:avpop .28s cubic-bezier(.2,.8,.25,1)}
   setTimeout(function(){ mark(); if(typeof dlg.showModal==='function') dlg.showModal(); else dlg.setAttribute('open',''); }, 300);
 })();
 </script>
-'''.replace('__LOGO__', logo)
+'''
 
-i = s.rfind('</body>')
-s = (s[:i] + EXTRA + s[i:]) if i != -1 else (s + EXTRA + '</body></html>')
 
-open(DST, 'w', encoding='utf-8').write(s)
-left = re.findall(r'href="?(https?://[^\s>"]+)', s)
-print('written', len(s), 'external hrefs left:', left)
+def common(s):
+    s = re.sub(r'<meta http-equiv=content-security-policy[^>]*>', '', s, flags=re.I)
+    s = re.sub(r'<!--\s*Page saved with SingleFile.*?-->', '', s, flags=re.S)
+    s = re.sub(r'\s*rel=canonical href=\S+?(?=>)', '', s)
+    s = s.replace('<a href=https://idcap.selecao.net.br/painel/ class=default__btn>',
+                  '<a href=/minhas-inscricoes.html class=default__btn data-testid=header-area-candidato-btn>')
+    s = s.replace('<a href=https://idcap.selecao.net.br/painel/>',
+                  '<a href=/minhas-inscricoes.html data-testid=footer-area-candidato-link>')
+    s = s.replace('<a href=https://idcap.selecao.net.br/>', '<a href=/ class=home-menu-link>')
+    s = s.replace('<a class=header__btn>', '<a class=header__btn id=menu-toggle data-testid=mobile-menu-toggle>')
+    return s
+
+
+def externalize(s):
+    os.makedirs(PUB + 'idcap/img', exist_ok=True)
+
+    def rep(m):
+        mime, b64 = m.group(1), m.group(2)
+        raw = base64.b64decode(b64)
+        h = hashlib.md5(raw).hexdigest()[:12]
+        if mime in ('image/png', 'image/jpeg', 'image/webp'):
+            im = Image.open(io.BytesIO(raw))
+            im.thumbnail((960, 960))
+            name = f'idcap/img/{h}.webp'
+            if not os.path.exists(PUB + name):
+                im.save(PUB + name, 'WEBP', quality=88)
+        else:
+            name = f'idcap/img/{h}.{mime.split("/")[1].split("+")[0]}'
+            if not os.path.exists(PUB + name):
+                open(PUB + name, 'wb').write(raw)
+        return '/' + name
+
+    return re.sub(r'data:(image/(?:png|jpeg|webp|svg\+xml));base64,([A-Za-z0-9+/=]{40000,})', rep, s)
+
+
+def finish(s, extra):
+    s = externalize(s)
+    s = re.sub(r'\s*target=_blank(?! rel=noopener)', '', s)
+    s = re.sub(r'href="?https?://[^\s>"]+"?', 'href=#', s)
+    s = re.sub(r'action=/index/todos/', 'action=#', s)
+    s = re.sub(r'<div vw class=enabled>.*?</div>\s*</div>\s*</div>', '', s, flags=re.S)
+    s = re.sub(r'<div id=vlibras-access-wrapper>.*?</template></div>', '', s, flags=re.S)
+    logo = re.search(r'<div class=header__logo>\s*<a[^>]*>\s*<img src="(data:[^"]+)"', s).group(1)
+    extra = extra.replace('__LOGO__', logo)
+    i = s.rfind('</body>')
+    return (s[:i] + extra + s[i:]) if i != -1 else (s + extra + '</body></html>')
+
+
+def build_cargo():
+    s = common(open(CARGO_SRC, encoding='utf-8').read())
+    s = s.replace('<a href="https://idcap.selecao.net.br/login/sair/?redir=%2Ftermo%2F263%2F" class=information__btn>',
+                  '<a href=/termos.html id=btn-inscreva-se class="information__btn js-inscricao" data-testid=home-fazer-inscricao-btn>')
+    s = s.replace('<a href=#back-to-top>', '<a href=# id=back-to-top-link data-testid=back-to-top-link>')
+    s = s.replace('<a href=javascript:void(0)>\n', '<a href=# class=js-action>\n')
+    pdfs = iter(['edital-abertura', 'anexo-i-cronograma', 'anexo-ii-atribuicao-cargo', 'anexo-iii-conteudo-programatico',
+                 'anexo-iv-declaracao-hipossuficiencia', 'resultado-impugnacoes', 'resultado-preliminar-isencao'])
+    s = re.sub(r'href=https://anexos-r2\.selecao\.net\.br/\S+?\.pdf target=_blank',
+               lambda m: (lambda n: f'href=/docs/idcap/{n}.pdf target=_blank rel=noopener data-testid=pub-{n}')(next(pdfs)), s)
+    s = s.replace('<title>Instituto IDCAP</title>', '<title>Assistente Administrativo - SEAD/AP 2026 | Instituto IDCAP</title>')
+    return finish(s, STYLE + NAV_JS)
+
+
+def build_home():
+    s = common(open(HOME_SRC, encoding='utf-8').read())
+    s = s.replace('<a href=https://idcap.selecao.net.br/informacoes/263/>',
+                  '<a href=/assistente-administrativo.html class=js-nav data-testid=card-sead-assistente>')
+    s = s.replace('<a href=https://idcap.selecao.net.br/informacoes/262/>',
+                  '<a href=# data-testid=card-sead-analista>')
+    return finish(s, STYLE + NAV_JS + TRACK_JS + MODAL)
+
+
+for name, html in [('assistente-administrativo.html', build_cargo()), ('inicio.html', build_home())]:
+    open(PUB + name, 'w', encoding='utf-8').write(html)
+    print(name, len(html), 'external hrefs left:', re.findall(r'href="?(https?://[^\s>"]+)', html),
+          'track' if '/api/track/access' in html else 'no-track', 'modal' if 'aviso-modal' in html else 'no-modal')
