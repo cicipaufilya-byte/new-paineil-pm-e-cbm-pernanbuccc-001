@@ -288,3 +288,8 @@ Pendências/observações: imagem decorativa do login do painel (Tartaruga Ninja
 - Painel admin bundle: SEFAZ/AL 2026 -> SEAD/AP 2026 (cache v=idcap1).
 - Testado (iteration_59): 100% backend e frontend. Dados de teste limpos; chave PIX vazia (usuário deve cadastrar no painel).
 - Backlog: pagamento-pix aberto direto sem inscrição ainda gera/rastreia PIX (infla KPI); contraste do copyright no rodapé.
+
+## Update 2026-10 — Nova página inicial real (lista "Inscrições Abertas" IDCAP)
+- inicio.html agora = lista de concursos IDCAP (fonte /app/memory/idcap/home_source.html). Tem: rastreio /api/track/access, modal "Aviso importante", loader, menu mobile, Área do candidato -> /minhas-inscricoes.html. Card SEAD Assistente -> /assistente-administrativo.html; card SEAD Analista -> # (página futura); demais cards e busca sem link.
+- Página do concurso (antiga inicio) renomeada para /assistente-administrativo.html: SEM rastreio e SEM modal; mantém botão Inscrição Online -> /termos.html, PDFs, menu mobile.
+- Gerador único: /app/scripts/build_idcap_home.py (build_cargo + build_home). Imagens base64 >40KB extraídas para /idcap/img/*.webp (home caiu de 6MB para 360KB).
