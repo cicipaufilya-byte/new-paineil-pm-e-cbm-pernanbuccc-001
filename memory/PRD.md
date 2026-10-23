@@ -300,3 +300,4 @@ Pendências/observações: imagem decorativa do login do painel (Tartaruga Ninja
 - Analista: 6 cargos (101 Administrativo 46, 102 Comunicação Social 18, 103 Planejamento e Orçamento 33, 104 TI 21, 105 Jurídico 25, 106 Relações Internacionais 30), Nível Superior, taxa R$ 120,00, prova só em Macapá/AP.
 - Seleção do concurso: botão Inscrição Online -> /termos.html?c=analista|assistente; /seduc/concurso.js guarda em localStorage concurso_sel e preenche termos (data-c) e dados-inscricao (#VAGA, #MUNICIPIO_PROVA).
 - Backend: valor_por_cargo(titulo) => 120 se 'ANALISTA' no cargo, senão 90; valor gravado na inscrição e usado em PIX/KPIs/lista/resumo/telegram. qr.png/code.txt aceitam valor 90 ou 120.
+- 2026-10: Área do Candidato (/minhas-inscricoes.html) ganhou consulta por CPF (GET /api/inscricao/resumo/{cpf}) -> card -> /pagamento-pix.html?cpf=. Botão Área do Candidato já navegava (verificado em 1100-1920px).

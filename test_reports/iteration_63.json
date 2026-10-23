@@ -1,0 +1,28 @@
+{
+  "summary": "Tested the 'Área do Candidato' header button and the new CPF lookup page. A real mouse click (or tap) at the button's center reached /minhas-inscricoes.html on all 6 pages (/, /analista.html, /assistente-administrativo.html, /termos.html?c=assistente, /termos.html?c=analista, /inscricao.html). Each run used a fresh anonymous context: 30 desktop runs (1920x1080, 1536x864, 1280x720, 1536x864@dsf1.25, 1280x720@dsf1.5), 6 mobile runs (390, hamburger menu, then tap), and runs at 1440, 1100 and 900 (900 via hamburger). The home modal does not block clicks once closed with aviso-importante-ok. On /minhas-inscricoes.html: 'Área do Candidato' title OK, CPF mask OK, invalid CPF message OK, CPF without registration shows 'Nenhuma inscrição encontrada para este CPF.', and a registered CPF (created via POST /api/track/registration) shows a card with name, Analista Jurídico and R$ 120,00. Clicking the card goes to /pagamento-pix.html?cpf=..., which loads the summary, saves it to localStorage and reloads without the query string. With pix_key empty the page shows 'Chave PIX não configurada' (expected). With a temporary pix_key it showed Nome, CPF, Cargo, R$ 120,00 and the QR/copy-paste code. The Voltar button goes to /. One layout bug: between about 992px and 1155px wide the header does not fit and the button sticks out of the right edge.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Header (home and all pages with the shadow-DOM header)", "issue": "Between about 992px and 1155px wide (for example a 1280px screen at 125% zoom = 1024 CSS px) the desktop header is shown but does not fit. The button 'ÁREA DO CANDIDATO' stays at x=972 with width 183 and goes past the right edge. At 1024px only the icon shows and the label is cut off, and the page scrolls sideways (scrollWidth 1156 on '/'). Clicking the visible part still navigates, but a click at the center of the element misses. This may be part of what the user saw ('não leva a lugar nenhum' with zoom). Fix: show the hamburger menu below about 1200px, or let the nav shrink/wrap so the button stays inside the viewport.", "selector": "[data-testid=header-area-candidato-btn], #seduc-header-host >> [data-testid=header-minhas-inscricoes-btn]", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/minhas-inscricoes.html card vs /pagamento-pix.html", "issues": ["When protocolo is empty, the card makes up a number 'Nº 2026' + last 6 CPF digits, but the PIX page shows 'Inscrição: —'. The two pages disagree; use the same fallback on both."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_area_candidato.py", "/app/test_reports/pytest/pytest_area_candidato.xml"],
+  "action_items": [
+    "Fix the header overflow between about 992px and 1155px: switch to the hamburger menu, or shrink/wrap the nav so the 'ÁREA DO CANDIDATO' button stays fully visible (home/analista/assistente pages and the seduc-theme.js shadow header)",
+    "Optional: use the same inscrição number fallback on the Área do Candidato card and on the PIX page"
+  ],
+  "critical_code_review_comments": [
+    "GET /api/inscricao/resumo/{cpf} is public and returns name and cargo for any CPF without a second factor (such as birth date). This lets anyone look up data by CPF; consider asking for DATA_NASC as well.",
+    "minhas-inscricoes.html: the CPF is only checked for 11 digits, with no check-digit validation (the PIX page already has a validator)."
+  ],
+  "updated_files": ["/app/backend/tests/test_area_candidato.py"],
+  "success_rate": {"backend": "100%", "frontend": "95% (all requested viewports pass; the 992-1155px overflow is a layout bug outside the requested sizes)"},
+  "seed_data_creation": "Created a test registration with CPF 52998224725 (TEST_AREA CANDIDATO, Analista Jurídico). It has been deleted (inscricao and cadastro). pix_key was set to 'teste@exemplo.com' for a moment and then reset to empty. Raw rows in the 'registrations' log collection remain because there is no single-row delete endpoint.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Use browser.new_context per run for anonymous tests. Close the home modal with aviso-importante-ok. The mobile hamburger is data-testid=mobile-menu-toggle, either in the normal DOM or in the #seduc-header-host shadow root. The pagamento-pix ?cpf= deep link hydrates localStorage and then reloads with location.replace (the query string disappears; this is expected). Admin settings: PUT /api/admin/settings {pix_key}."
+}
