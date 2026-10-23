@@ -1993,3 +1993,31 @@ async def lembrete_status(job_id: str, user=Depends(require_admin)):
     if not job:
         raise HTTPException(status_code=404, detail='Job não encontrado')
     return job
+
+
+@admin_router.post('/admin/inscricoes/{cpf}/lembrete-pagamento')
+async def lembrete_individual(cpf: str, request: Request, user=Depends(require_admin)):
+    dig = re.sub(r'\D', '', cpf or '')
+    if len(dig) != 11:
+        raise HTTPException(status_code=400, detail='CPF inválido')
+    fmt = f'{dig[:3]}.{dig[3:6]}.{dig[6:9]}-{dig[9:]}'
+    d = await _db.inscricoes.find_one({'cpf': {'$in': [fmt, dig]}, 'finalized': True}, {'_id': 0}, sort=[('created_at', -1)])
+    if not d:
+        raise HTTPException(status_code=404, detail='Inscrição não encontrada')
+    if not d.get('email') or '@' not in d.get('email', ''):
+        raise HTTPException(status_code=400, detail='Candidato sem e-mail cadastrado')
+    hoje = _hoje_brt()
+    html = build_inscricao_email_html(
+        nome=d.get('nome', ''), cpf=d.get('cpf', ''), protocolo=d.get('protocolo', ''),
+        cargo=d.get('cargo_titulo', '') or d.get('cargo_codigo', ''), concurso='',
+        valor=d.get('valor') or VALOR_INSCRICAO, base_url=_site_base_url(request),
+        lembrete_prazo=f'{hoje}, às 23h59 (horário de Brasília)',
+    )
+    ok = await try_send_email(to=d['email'], subject='Lembrete: sua inscrição está pendente de pagamento', html=html)
+    if not ok:
+        raise HTTPException(status_code=422, detail='Não foi possível enviar: o envio de e-mail não está configurado ou o provedor recusou.')
+    nome_c = d.get('nome', '') or 'Candidato'
+    await insert_event('lembrete', f'Lembrete de pagamento enviado - {nome_c}', {'nome': nome_c, 'cpf': d.get('cpf', ''), 'email': d['email']})
+    await _db.inscricoes.update_one({'cpf': d.get('cpf'), 'protocolo': d.get('protocolo', '')},
+                                    {'$set': {'lembrete_enviado_dia': hoje, 'lembrete_enviado_at': datetime.now(timezone.utc).isoformat()}})
+    return {'ok': True, 'email': d['email'], 'nome': nome_c}

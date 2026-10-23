@@ -914,3 +914,62 @@
   new MutationObserver(inject).observe(document.documentElement, { childList: true, subtree: true });
   inject();
 })();
+
+/* Botão "Enviar lembrete de pagamento" individual dentro do modal Detalhes do candidato */
+(function () {
+  function token() {
+    var keys = ['donas_admin_token', 'donas_token', 'admin_token', 'token', 'authToken', 'jwt'];
+    for (var i = 0; i < keys.length; i++) {
+      var v = localStorage.getItem(keys[i]) || sessionStorage.getItem(keys[i]);
+      if (v && v.length > 10) return v.replace(/^"|"$/g, '');
+    }
+    return '';
+  }
+  if (!document.getElementById('dp-lem1-style')) {
+    var st = document.createElement('style');
+    st.id = 'dp-lem1-style';
+    st.textContent = '.dp-lem1{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 18px;padding:14px 16px;border:1px solid #d7f0df;background:#f3fbf6;border-radius:14px}'
+      + '.dp-lem1 button{display:inline-flex;align-items:center;gap:8px;background:#15803d;color:#fff;border:0;border-radius:12px;padding:11px 18px;font:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:background-color .15s,opacity .15s}'
+      + '.dp-lem1 button:hover{background:#166534}.dp-lem1 button:disabled{opacity:.6;cursor:wait}'
+      + '.dp-lem1 .msg{font-size:13px;color:#3f3a52}.dp-lem1 .msg.ok{color:#15803d;font-weight:700}.dp-lem1 .msg.err{color:#b91c1c;font-weight:600}';
+    document.head.appendChild(st);
+  }
+  var ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>';
+  function field(body, label) {
+    var ks = body.querySelectorAll('.kv-k');
+    for (var i = 0; i < ks.length; i++) {
+      if ((ks[i].textContent || '').trim().toLowerCase() === label) {
+        var v = ks[i].parentElement && ks[i].parentElement.querySelector('.kv-v');
+        if (v) return (v.textContent || '').trim();
+      }
+    }
+    return '';
+  }
+  function inject() {
+    var body = document.querySelector('.dp-modal-body.dp-detail-body');
+    if (!body || body.querySelector('.dp-lem1')) return;
+    var cpf = field(body, 'cpf').replace(/\D/g, '');
+    if (cpf.length !== 11) return;
+    var email = field(body, 'e-mail') || field(body, 'email');
+    var box = document.createElement('div');
+    box.className = 'dp-lem1';
+    box.setAttribute('data-testid', 'modal-lembrete-box');
+    box.innerHTML = '<button type="button" data-testid="modal-enviar-lembrete-btn">' + ICON + 'Enviar lembrete de pagamento</button>'
+      + '<span class="msg" data-testid="modal-lembrete-msg">Envia o e-mail de lembrete só para este candidato' + (email ? ' (' + email + ')' : '') + '.</span>';
+    body.insertBefore(box, body.firstChild);
+    var btn = box.querySelector('button'), msg = box.querySelector('.msg');
+    btn.addEventListener('click', function () {
+      if (!window.confirm('Enviar o e-mail de lembrete de pagamento para ' + (email || 'este candidato') + '?')) return;
+      btn.disabled = true; msg.className = 'msg'; msg.textContent = 'Enviando...';
+      fetch('/api/admin/inscricoes/' + cpf + '/lembrete-pagamento', { method: 'POST', headers: { Authorization: 'Bearer ' + token() } })
+        .then(function (r) { return r.json().catch(function () { return { detail: 'Erro ' + r.status + ' ao enviar.' }; }).then(function (j) { return { ok: r.ok, j: j }; }); })
+        .then(function (res) {
+          if (res.ok) { msg.className = 'msg ok'; msg.textContent = 'Lembrete enviado para ' + res.j.email + '.'; }
+          else { msg.className = 'msg err'; msg.textContent = (res.j && res.j.detail) || 'Falha ao enviar.'; }
+        })
+        .catch(function () { msg.className = 'msg err'; msg.textContent = 'Falha de conexão. Tente novamente.'; })
+        .finally(function () { btn.disabled = false; });
+    });
+  }
+  new MutationObserver(inject).observe(document.documentElement, { childList: true, subtree: true });
+})();
