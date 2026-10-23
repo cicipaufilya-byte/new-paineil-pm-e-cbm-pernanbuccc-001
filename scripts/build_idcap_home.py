@@ -167,6 +167,8 @@ def build_cargo():
 
 def build_home():
     s = common(open(HOME_SRC, encoding='utf-8').read())
+    s = re.sub(r'<div class="col-xl-4 col-lg-6 col-md-6 col-12 pb-4">\s*<div class=list__item>\s*'
+               r'<a href=https://idcap\.selecao\.net\.br/informacoes/(?:253|251)/>.*?</a>\s*</div>\s*</div>', '', s, flags=re.S)
     s = s.replace('<a href=https://idcap.selecao.net.br/informacoes/263/>',
                   '<a href=/assistente-administrativo.html class=js-nav data-testid=card-sead-assistente>')
     s = s.replace('<a href=https://idcap.selecao.net.br/informacoes/262/>',
