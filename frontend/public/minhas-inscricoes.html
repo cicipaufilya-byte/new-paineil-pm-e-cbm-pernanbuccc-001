@@ -79,11 +79,11 @@ h1.t{color:var(--ink);font-size:26px;font-weight:800;margin:0 0 6px;padding:0 4p
   var d={};try{d=JSON.parse(localStorage.getItem('inscricao_dados')||'{}');}catch(e){}
   var inp=document.getElementById('cpf-busca'),msg=document.getElementById('busca-msg'),form=document.getElementById('busca-cpf');
   if(d&&d.CPF&&(d.__protocolo||d.__finalizado_ok)){
-    card({protocolo:d.__protocolo,nome:d.NOME,cpf:d.CPF,cargo:d.__vaga_label||d.VAGA,taxa:d.__taxa},'/pagamento-pix.html');
+    card({protocolo:d.__protocolo,nome:d.NOME,cpf:d.CPF,cargo:d.__vaga_label||d.VAGA,taxa:d.__taxa},'/inscricao-realizada.html');
     form.style.display='none';
     document.getElementById('sub-txt').textContent='Esta é a inscrição feita neste navegador. Clique nela para ver os detalhes e o pagamento.';
     var lk=document.getElementById('outro-cpf');lk.style.display='inline-block';
-    lk.addEventListener('click',function(e){e.preventDefault();form.style.display='block';lk.style.display='none';inp.focus();});
+    lk.addEventListener('click',function(e){e.preventDefault();form.style.display='block';lk.style.display='none';document.getElementById('sub-txt').textContent='Consulte sua inscrição pelo CPF.';inp.focus();});
   }
   inp.addEventListener('input',function(){var v=inp.value.replace(/\D/g,'').slice(0,11);inp.value=v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2');});
   document.getElementById('busca-cpf').addEventListener('submit',function(e){
@@ -92,7 +92,7 @@ h1.t{color:var(--ink);font-size:26px;font-weight:800;margin:0 0 6px;padding:0 4p
     if(cpf.length!==11){msg.textContent='Informe um CPF válido com 11 dígitos.';msg.style.display='block';return;}
     fetch('/api/inscricao/resumo/'+cpf).then(function(r){return r.ok?r.json():null;}).then(function(j){
       if(!j){lista.innerHTML='';msg.textContent='Nenhuma inscrição encontrada para este CPF.';msg.style.display='block';return;}
-      card({protocolo:j.protocolo,nome:j.nome,cpf:j.cpf,cargo:j.cargo_titulo,taxa:j.taxa},'/pagamento-pix.html?cpf='+cpf);
+      card({protocolo:j.protocolo,nome:j.nome,cpf:String(j.cpf||cpf).replace(/\D/g,'').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'),cargo:j.cargo_titulo,taxa:j.taxa},'/pagamento-pix.html?cpf='+cpf);
     }).catch(function(){msg.textContent='Não foi possível consultar agora. Tente novamente.';msg.style.display='block';});
   });
 })();

@@ -302,3 +302,4 @@ Pendências/observações: imagem decorativa do login do painel (Tartaruga Ninja
 - Backend: valor_por_cargo(titulo) => 120 se 'ANALISTA' no cargo, senão 90; valor gravado na inscrição e usado em PIX/KPIs/lista/resumo/telegram. qr.png/code.txt aceitam valor 90 ou 120.
 - 2026-10: Área do Candidato (/minhas-inscricoes.html) ganhou consulta por CPF (GET /api/inscricao/resumo/{cpf}) -> card -> /pagamento-pix.html?cpf=. Botão Área do Candidato já navegava (verificado em 1100-1920px).
 - 2026-10: Cabeçalho IDCAP 992-1199px compactado (sem overflow do botão Área do Candidato); seduc-theme V=31.
+- 2026-10: Área do Candidato mostra direto a inscrição feita no navegador (sem pedir CPF) + link 'Consultar outra inscrição pelo CPF'.

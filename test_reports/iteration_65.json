@@ -1,0 +1,30 @@
+{
+  "summary": "Frontend-only test of the /minhas-inscricoes.html 'same browser' feature (1920x1080). Full real UI flow executed: termos.html?c=analista -> inscricao.html (CPF 529.982.247-25, RG + front/back upload) -> dados-inscricao.html (Analista Administrativo, Macapá) -> confirmacao.html -> confirm -> inscricao-realizada.html (protocol 2026224725, R$ 120,00). PASS: (1) clicking the header 'Área do Candidato' in the same browser opened /minhas-inscricoes.html with the CPF form hidden, 1 card-inscricao (Nº 2026224725, TEST CANDIDATO AREA, 529.982.247-25, Analista Administrativo, R$ 120,00), the subtitle 'Esta é a inscrição feita neste navegador...' and the btn-consultar-outro-cpf link visible. (2) btn-consultar-outro-cpf shows the form, hides the link and puts focus on cpf-busca. Searching 111.444.777-35 shows 'Nenhuma inscrição encontrada para este CPF.' and 0 cards. (3) Partial storage (stopped at dados-inscricao: CPF set, no __protocolo, no __finalizado_ok): form shown, 0 cards, link hidden. (4) Anonymous fresh context: storage null, form shown, 0 cards. Searching 529.982.247-25 shows the card with the right data, and clicking it goes to /pagamento-pix.html?cpf=..., which uses location.replace to land on /pagamento-pix.html. That page shows 'Chave PIX não configurada' because pix_key is empty, which is expected. FAIL vs spec: in the same-browser case the card click goes to /pagamento-pix.html, NOT to /inscricao-realizada.html as the requirement says.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "minhas-inscricoes.html same-browser card", "issue": "The card click goes to '/pagamento-pix.html'. The requirement says it should open /inscricao-realizada.html with the data. Line 82: card({...},'/pagamento-pix.html') should be card({...},'/inscricao-realizada.html').", "selector": "[data-testid=card-inscricao]", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/minhas-inscricoes.html after 'Consultar outra inscrição pelo CPF'", "issues": ["The #sub-txt subtitle still says 'Esta é a inscrição feita neste navegador. Clique nela...' after the form is reopened, and after a failed search clears the card. It should go back to the default text when the link is clicked."]},
+      {"screen": "/minhas-inscricoes.html CPF-search card", "issues": ["The CPF in the card from the API search is shown unformatted ('52998224725'). The same-browser card shows '529.982.247-25'. Inconsistent."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Change the same-browser card href in minhas-inscricoes.html line 82 from '/pagamento-pix.html' to '/inscricao-realizada.html' (per requirement)",
+    "Reset #sub-txt to the default text when btn-consultar-outro-cpf is clicked",
+    "Format the CPF from the API (j.cpf) as 000.000.000-00 in the search card"
+  ],
+  "critical_code_review_comments": [
+    "The same-browser card trusts localStorage only (CPF + __protocolo/__finalizado_ok). If an admin deletes the registration, the card still shows 'PENDENTE DE PAGAMENTO'. Consider checking /api/inscricao/resumo/{cpf} in the background.",
+    "Unchanged: /api/inscricao/resumo/{cpf} exposes name/cargo by CPF alone; the CPF search has no check-digit validation."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (skipped)", "frontend": "83% (5/6 checks; card destination mismatch)"},
+  "seed_data_creation": "Created a test registration for CPF 52998224725 (TEST CANDIDATO AREA). Deleted it afterwards from inscricoes, cadastros, registrations and pix_generated. /api/inscricao/resumo/52998224725 now returns 404. settings.pix_key is ''.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Each browser_automation call is a fresh browser, so run the whole flow in one script. Flow: /termos.html?c=analista -> termos-checkbox, btn-continuar-termos -> inscricao.html: NOME, #CPF, #DATA_NASCIMENTO, select[name=SEXO]='0', #CEP 68900-073, #CELULAR, #EMAIL, #DOC_TIPO=RG + set_input_files #DOC_FRENTE/#DOC_VERSO, #declaracao_veracidade, btn-continuar-inscricao -> dados-inscricao: select-vaga index 1 (analista has several), select-municipio-prova 'MACAPA/AP', input[name=termo] (required!), btn-cadastrar -> confirmacao btn-confirmar-inscricao -> conf-success-ok -> inscricao-realizada. Header button has no data-testid in this page; use get_by_text('Área do Candidato').locator('visible=true').first. Cleanup with mongosh by cpf across collections."
+}
