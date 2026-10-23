@@ -1,5 +1,5 @@
 (function(){
-var V='38';
+var V='39';
 function fontsLink(){
  if(document.getElementById('ceb-fonts'))return;
  var l=document.createElement('link');l.id='ceb-fonts';l.rel='stylesheet';l.href='/idcap/fonts.css?v='+V;document.head.appendChild(l);
@@ -52,6 +52,7 @@ function build(p){
  if(document.getElementById('seduc-header-host'))return;
  fontsLink();
  var hr=host('seduc-header-host',p.h,p.cls,true);
+ (function(){var b=hr.querySelector('[data-testid=header-minhas-inscricoes-btn]');if(!b)return;var pth=location.pathname;if(/minhas-inscricoes/.test(pth)){var pn=b.closest('.header__panel');(pn||b).remove();}else if(/pagamento-pix|inscricao-realizada/.test(pth)){b.innerHTML='<i class="uil uil-user-circle"></i>Minhas inscrições';}})();
  (function(){var hh=document.getElementById('seduc-header-host');function pad(){hh.style.setProperty('position','fixed','important');hh.style.setProperty('top','0','important');hh.style.setProperty('left','0','important');hh.style.setProperty('right','0','important');hh.style.setProperty('z-index','9990','important');document.body.style.setProperty('padding-top',hh.offsetHeight+'px','important');}pad();window.addEventListener('resize',pad);setTimeout(pad,400);setTimeout(pad,1500);if(window.ResizeObserver){new ResizeObserver(pad).observe(hh);}})();
  if(/minhas-inscricoes/.test(location.pathname)){hr.querySelectorAll('.header__action-follow-button,[data-testid=header-minhas-inscricoes-btn]').forEach(function(el){el.remove();});}
  menu(hr);
