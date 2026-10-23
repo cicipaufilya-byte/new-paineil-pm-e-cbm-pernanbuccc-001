@@ -8,7 +8,11 @@ html body:not(#vn_a):not(#vn_b):not(#vn_c) button,
 html body:not(#vn_a):not(#vn_b):not(#vn_c) .blocoPadrao,
 html body:not(#vn_a):not(#vn_b):not(#vn_c) .blocoPadrao *:not(i):not([class*=uil]),
 html body:not(#vn_a):not(#vn_b):not(#vn_c) .wrap,
-html body:not(#vn_a):not(#vn_b):not(#vn_c) .wrap *:not(i){font-family:"Silka",Arial,sans-serif!important}
+html body:not(#vn_a):not(#vn_b):not(#vn_c) .wrap *:not(i),
+html body:not(#vn_a):not(#vn_b):not(#vn_c) h2.tituloPagina,
+html body:not(#vn_a):not(#vn_b):not(#vn_c) h2.tituloPagina span,
+html body:not(#vn_a):not(#vn_b):not(#vn_c) .vn-sub,
+html body:not(#vn_a):not(#vn_b):not(#vn_c) h3.vn-keep{font-family:"Silka",Arial,sans-serif!important}
 html body:not(#vn_a):not(#vn_b):not(#vn_c) h2.tituloPagina,
 html body:not(#vn_a):not(#vn_b):not(#vn_c) h2.tituloPagina span,
 html body:not(#vn_a):not(#vn_b):not(#vn_c) .blocoPadrao h1,
@@ -32,6 +36,7 @@ html body:not(#vn_a):not(#vn_b):not(#vn_c) .busca button:hover{background:#1f5ad
 html body:not(#vn_a):not(#vn_b):not(#vn_c) #btn-salvar[disabled],
 html body:not(#vn_a):not(#vn_b):not(#vn_c) #btn-salvar:disabled{background:#3576fb!important;border-color:#3576fb!important;opacity:.45!important}
 html body:not(#vn_a):not(#vn_b):not(#vn_c) #btn-alterar,
+html body:not(#vn_a):not(#vn_b):not(#vn_c) #btn-voltar-dados,
 html body:not(#vn_a):not(#vn_b):not(#vn_c) #p-btn-voltar,
 html body:not(#vn_a):not(#vn_b):not(#vn_c) #p-btn-print,
 html body:not(#vn_a):not(#vn_b):not(#vn_c) .wrap a.back{border-radius:999px!important;background:#fff!important;border:2px solid #3576fb!important;color:#3576fb!important;font-weight:600!important}
@@ -57,3 +62,6 @@ html body:not(#vn_a):not(#vn_b):not(#vn_c) textarea:focus{border-color:#3576fb!i
   html body:not(#vn_a):not(#vn_b):not(#vn_c) h2.tituloPagina span,
   html body:not(#vn_a):not(#vn_b):not(#vn_c) .wrap h1.t{font-size:22px!important}
 }
+
+html body:not(#vn_a):not(#vn_b):not(#vn_c) .wrap{margin-bottom:48px!important}
+html body:not(#vn_a):not(#vn_b):not(#vn_c) input[name=termo]{width:24px!important;height:24px!important}

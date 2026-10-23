@@ -1,0 +1,57 @@
+{
+  "summary": "Frontend-only mobile audit of 11 public pages, run in Chromium mobile emulation (isMobile, hasTouch, DPR 2-3) at iPhone 390x844 (iOS UA), Pixel 393x851 and Galaxy 360x780 (Android UA), plus a quick desktop 1920 regression. WebKit is NOT installed in this environment, so iOS behaviour was approximated with Chromium + iOS UA. PASS: no horizontal scroll on any page or viewport (scrollWidth == innerWidth). The hamburger menu is present on all pages except /minhas-inscricoes, where it is removed by design. Tapping it opens the drawer, tapping outside closes it, and 'Área do Candidato' in the drawer navigates to /minhas-inscricoes.html on all 10 pages tested (home/analista/assistente via data-testid mobile-menu-toggle, flow pages via #idcap-menu-btn in the shadow root). The header stays at top:0 after scrolling (sticky on home/analista/assistente, fixed on the flow pages). Inputs and selects compute to font-size >= 16px on all flow pages. Full Android 360 flow PASSES: home card-sead-analista -> analista -> INSCRIÇÃO ONLINE -> termos -> inscricao (CPF 529.982.247-25, RG + front/back upload) -> dados-inscricao (101 Analista Administrativo, MACAPÁ/AP) -> confirmacao -> inscricao-realizada (R$ 120,00, Nº 2026224725, PENDENTE DE PAGAMENTO) -> Pagar -> pagamento-pix. A PIX key is now configured in settings, so the PIX was generated instead of the 'no PIX key' error: QR code and copia-e-cola render correctly with no overflow. FAIL (HIGH): on 5 flow pages (inscricao, dados-inscricao, confirmacao, inscricao-realizada, pagamento-pix) the fixed header covers the start of the content on BOTH mobile and desktop. The body padding-top that is meant to offset the header is overridden.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "seduc-theme.js pad() + inscricao/dados-inscricao/confirmacao/inscricao-realizada/pagamento-pix .html",
+        "issue": "The fixed header covers the top of the page content. seduc-theme.js line 55 sets document.body.style.paddingTop = header height with an inline style that has no !important. These 5 pages have <body class='... __cebraspe-applied'> and inline CSS 'body.__cebraspe-applied { padding-top: 0 !important }', which wins, so the computed padding-top is 0px. Mobile 360/390 (header 90px): the 'SEAD/AP 2026' heading sits at top 32-69px, hidden under the header, and the subtitle is cut in half. Desktop 1920 (header 170px): the heading sits at 28-80px, fully hidden, and on confirmacao 'Confirmação dos Dados' is half covered. termos.html and minhas-inscricoes.html are fine (computed padding 90/170px).",
+        "selector": "#seduc-header-host, h3.vn-keep",
+        "priority": "HIGH"
+      },
+      {
+        "component": "Home (/) search input",
+        "issue": "input#busca has a computed font-size of 13px on mobile, so iOS Safari will auto-zoom when it is focused. flow.css (which sets 16px) is not loaded on the home page, and the home page has no equivalent rule.",
+        "selector": "input[name=busca]",
+        "priority": "MEDIUM"
+      },
+      {
+        "component": "Hamburger buttons (all pages)",
+        "issue": "The tap target is 32px wide x 70-90px tall, below the 44px minimum width. Adding padding or a min-width of 44px is recommended.",
+        "selector": "[data-testid=mobile-menu-toggle], #idcap-menu-btn",
+        "priority": "LOW"
+      },
+      {
+        "component": "dados-inscricao declaration checkbox",
+        "issue": "input[name=termo] is 18x18px. It works on tap, but the touch target is small; making the whole label clickable or enlarging the box is recommended.",
+        "selector": "input[name=termo]",
+        "priority": "LOW"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/confirmacao.html", "issues": ["h2.tituloPagina 'Confirmação dos Dados' renders in 'Helvetica Neue' and p.vn-sub in 'Proxima Nova Rg'/Arial instead of Silka. On other flow pages these elements compute to Silka. The flow.css font-family rule only targets .blocoPadrao/.wrap descendants; add 'h2.tituloPagina, h2.tituloPagina span, .vn-sub' to it."]},
+      {"screen": "/dados-inscricao.html", "issues": ["The VOLTAR button keeps the old style (gray border, black text, square corners) and is inconsistent with the new IDCAP pill buttons (#btn-alterar/#p-btn-voltar style)."]},
+      {"screen": "/minhas-inscricoes.html mobile", "issues": ["The '← Voltar' button sits directly on the footer with no bottom margin, and the footer's blue block appears offset about 15px from the left edge (a gray strip is visible on the left at 360px)."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "HIGH: in /app/frontend/public/seduc/seduc-theme.js pad(), replace document.body.style.paddingTop=hh.offsetHeight+'px' with document.body.style.setProperty('padding-top',hh.offsetHeight+'px','important'), then bump V. Verified live via evaluate: the heading then sits at 122-136px (below the 90px header) on confirmacao and inscricao. Alternatively, remove 'padding-top:0 !important' from body.__cebraspe-applied in the 5 flow pages. Re-check desktop 1920 (header 170px) afterwards.",
+    "MEDIUM: set font-size:16px on the home search input (#busca) for max-width:767px to avoid iOS zoom.",
+    "LOW: hamburger min-width 44px; Silka font for h2.tituloPagina/.vn-sub on confirmacao; restyle VOLTAR on dados-inscricao; add a gap above the footer on minhas-inscricoes."
+  ],
+  "critical_code_review_comments": [
+    "seduc-theme.js pad() uses a non-important inline style, which loses against the page-level 'body.__cebraspe-applied{padding-top:0!important}' rule. This is the root cause of the header overlap.",
+    "pad() is only recalculated on resize and once at 400ms. If fonts or images change the header height later (e.g. the logo loads after 400ms on slow 3G), the padding will be stale. Consider a ResizeObserver on the host.",
+    "When the menu is open, document.documentElement.style.overflow='hidden' does not stop background scrolling on iOS Safari; body position:fixed or overscroll-behavior is needed for a real iOS scroll lock (not verifiable here because WebKit is not installed)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (skipped)", "frontend": "~80% (hamburger, no horizontal scroll, sticky/fixed header, full flow and input font-size on flow pages pass; header overlap on 5 flow pages fails on mobile and desktop; home search font-size fails)"},
+  "test_credentials": "Not needed (public pages).",
+  "seed_data_creation": "Created 1 inscription via the UI (CPF 52998224725, TESTE MOBILE, Nº 2026224725). Afterwards, all documents with that CPF were deleted with mongosh from test_database: inscricoes 1, pix_generated 1, cadastros 1, registrations 5.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Use the browser_automation tool with page.context.browser.new_context(viewport, is_mobile=True, has_touch=True) for mobile emulation. Only chromium_headless_shell is installed, with no WebKit and no local python playwright. Locator.tap() on the hamburger times out, so tap via bounding_box + p.touchscreen.tap. The drawer opens on the LEFT (260px), so to 'tap outside' tap at x≈370. To verify the header overlap fix, compare document.querySelector('h3.vn-keep').getBoundingClientRect().top with #seduc-header-host offsetHeight on inscricao/dados-inscricao/confirmacao/inscricao-realizada/pagamento-pix. In dados-inscricao, input[name=termo] must be checked to enable btn-cadastrar. A PIX key is now configured in settings (pix_key set), so pagamento-pix generates a QR. Clean up by cpf across all collections.",
+  "rca of the issue": "Header overlap: the flow pages contain the legacy 'body.__cebraspe-applied { padding-top:0 !important; margin-top:0 !important }' rule, and the body has that class. seduc-theme.js now makes #seduc-header-host position:fixed (flow.css) and compensates with an inline body paddingTop without !important, so the computed padding-top stays 0 and the content starts under the header. termos.html and minhas-inscricoes.html do not have that class, so they work. Repro: open /confirmacao.html at 360x780 and see 'SEAD/AP 2026' hidden behind the header, or at 1920x1080 see the title cut. Mitigation: setProperty('padding-top', h+'px', 'important'), validated live."
+}

@@ -303,3 +303,4 @@ Pendências/observações: imagem decorativa do login do painel (Tartaruga Ninja
 - 2026-10: Área do Candidato (/minhas-inscricoes.html) ganhou consulta por CPF (GET /api/inscricao/resumo/{cpf}) -> card -> /pagamento-pix.html?cpf=. Botão Área do Candidato já navegava (verificado em 1100-1920px).
 - 2026-10: Cabeçalho IDCAP 992-1199px compactado (sem overflow do botão Área do Candidato); seduc-theme V=31.
 - 2026-10: Área do Candidato mostra direto a inscrição feita no navegador (sem pedir CPF) + link 'Consultar outra inscrição pelo CPF'.
+- 2026-10: Seed de 50 inscrições demo (25 Analista/25 Assistente, mobile/desktop, PIX gerado+copiado, sem pagamento) via /app/scripts/seed_50_inscricoes.py; log /app/memory/seed_50.log. Acessos ajustados para Macapá/Santana-AP. Mobile: header fixo nas páginas do fluxo (padding important), busca home 16px, hamburger 44px, Voltar pill.
