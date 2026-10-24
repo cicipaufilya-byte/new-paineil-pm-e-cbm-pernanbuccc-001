@@ -52,4 +52,5 @@
     }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fill); else fill();
+  window.addEventListener('load', function(){ var v=document.getElementById('VAGA'); if (v && v.selectedIndex < 0) v.selectedIndex = 0; });
 })();
