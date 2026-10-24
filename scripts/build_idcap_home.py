@@ -166,7 +166,17 @@ def build_cargo(src, kind, concurso_id, pdf_dir, pdfs, title):
     s = re.sub(r'href=https://anexos-r2\.selecao\.net\.br/\S+?\.pdf target=_blank',
                lambda m: (lambda n: f'href=/docs/{pdf_dir}/{n}.pdf target=_blank rel=noopener data-testid=pub-{n}')(next(it)), s)
     s = s.replace('<title>Instituto IDCAP</title>', f'<title>{title} - SEAD/AP 2026 | Instituto IDCAP</title>')
-    return finish(s, STYLE + NAV_JS.replace("bind('#btn-inscreva-se, .js-inscricao', '/termos.html');", "bind('#btn-inscreva-se');"))
+    cargo_css = ('<style>@media (max-width:767px){'
+                 '.contest__information .information__logo{width:110px!important;height:110px!important;padding:8px!important;margin:0 auto!important;display:flex!important;align-items:center!important;justify-content:center!important}'
+                 '.contest__information .information__logo img{max-width:100%!important;max-height:100%!important;width:auto!important;height:auto!important;margin:0 auto!important;object-fit:contain}'
+                 '.contest__information .information__left{width:120px!important;margin:0 auto 18px!important;background:#fff!important}'
+                 '.contest__information .information__label{font-size:12px!important;margin-bottom:6px!important}'
+                 '.contest__information .information__title{font-size:18px!important;line-height:1.35!important;margin-bottom:12px!important}'
+                 '.contest__information .information__info p{font-size:11px!important;letter-spacing:-.15px;white-space:nowrap;line-height:1.5!important;margin:0 0 6px!important}'
+                 '.contest__information .information__info{margin-bottom:14px!important}'
+                 '.contest__information .information__btn{padding:12px 26px!important;font-size:14px!important}'
+                 '}</style>')
+    return finish(s, STYLE + cargo_css + NAV_JS.replace("bind('#btn-inscreva-se, .js-inscricao', '/termos.html');", "bind('#btn-inscreva-se');"))
 
 
 def build_home():
