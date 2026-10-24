@@ -179,7 +179,20 @@ def build_home():
                   '<a href=/analista.html class=js-nav data-testid=card-sead-analista>')
     s = s.replace('<div class="footer__status footer__item status__opened">Inscrições abertas</div>',
                   '<div class="footer__status footer__item status__opened" data-testid=card-inscreva-se>Inscreva-se</div>')
-    return finish(s, STYLE + NAV_JS + TRACK_JS + MODAL)
+    home_css = ('<style>@media (max-width:767px){'
+                '.home__contests .header__filter{display:none!important}'
+                '.home__contests .contests__header{padding-top:0!important;margin:0!important;min-height:0!important}'
+                '.home__contests .container.pt-5{padding-top:22px!important}'
+                '.contests__list .list__item .item__logo{width:100px!important;height:100px!important;padding:8px!important;margin-bottom:4px!important}'
+                '.contests__list .list__item .item__logo img{max-width:100%!important;max-height:100%!important}'
+                '.contests__list .list__item .item__content{padding:10px 16px 14px!important}'
+                '.contests__list .list__item .content__label{font-size:12px!important;margin-bottom:6px!important}'
+                '.contests__list .list__item .content__title{font-size:16px!important;line-height:1.35!important;margin-bottom:10px!important}'
+                '.contests__list .list__item .content__infos{font-size:12px!important;line-height:1.7!important;white-space:normal}'
+                '.contests__list .list__item .item__footer .footer__item{padding-top:12px!important;padding-bottom:12px!important;min-height:0!important}'
+                '.contests__list .list__item .item__footer .footer__job h4{font-size:22px!important}'
+                '}</style>')
+    return finish(s, STYLE + home_css + NAV_JS + TRACK_JS + MODAL)
 
 
 PDFS_ASSIST = ['edital-abertura', 'anexo-i-cronograma', 'anexo-ii-atribuicao-cargo', 'anexo-iii-conteudo-programatico',

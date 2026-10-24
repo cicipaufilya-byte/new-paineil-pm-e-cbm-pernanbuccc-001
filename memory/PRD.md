@@ -310,3 +310,4 @@ Pendências/observações: imagem decorativa do login do painel (Tartaruga Ninja
 - 2026-10: Resend configurado (RESEND_API_KEY secret + RESEND_FROM no-reply@concursoamapa.online). E-mail: prazo pagamento 30/10/2026, cores IDCAP, concurso Edital 001/2026 (Analista/Assistente). Lembrete individual usa prazo 30/10. ATENÇÃO: 50 inscrições demo têm e-mails inventados (gmail etc.) — não usar lembrete em lote antes de limpar.
 - 2026-10: termos.html sem flash (vn-wait + espera fontes), header fixo aplicado inline via JS (sem gap duplo), espaçamento título reduzido (28px). seduc-theme V=37.
 - 2026-10: Remetente contato@concursoamapa.online; prazo do e-mail 29/10/2026 23h59 (inscrição e pagamento); CPF formatado no e-mail.
+- 2026-10: Home mobile (<768px): busca removida, cards compactos (logo 100px, título 16px, infos 12px). CSS home_css em build_home.
