@@ -313,3 +313,4 @@ Pendências/observações: imagem decorativa do login do painel (Tartaruga Ninja
 - 2026-10: Home mobile (<768px): busca removida, cards compactos (logo 100px, título 16px, infos 12px). CSS home_css em build_home.
 - 2026-10: Páginas analista/assistente mobile: bloco de informações compacto (logo 120px, título 18px, datas 11px numa linha, botão menor). cargo_css em build_cargo.
 - 2026-10: termos.html mobile compacto: textos 14px justificados, checkbox acima do texto 'Declaro', botões 48px.
+- 2026-10: flow.css mobile: inscricao compacta (LGPD 13px justificado, título 20px, 'Estou ciente' checkbox acima + justificado). V=41.

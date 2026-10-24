@@ -65,3 +65,18 @@ html body:not(#vn_a):not(#vn_b):not(#vn_c) textarea:focus{border-color:#3576fb!i
 
 html body:not(#vn_a):not(#vn_b):not(#vn_c) .wrap{margin-bottom:48px!important}
 html body:not(#vn_a):not(#vn_b):not(#vn_c) input[name=termo]{width:24px!important;height:24px!important}
+@media (max-width:767px){
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) .aocp-edital-card{margin-top:8px!important;margin-bottom:10px!important;padding-top:10px!important;padding-bottom:10px!important}
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) .aocp-edital-card .aec-head h3{font-size:22px!important;margin-bottom:4px!important}
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) .vn-sub{font-size:15px!important;line-height:1.35!important}
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) h2.tituloPagina,
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) h2.tituloPagina span{font-size:20px!important;margin:6px 0 10px!important}
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) .vn-lgpd{font-size:13px!important;line-height:1.55!important;padding:12px 14px!important;margin-bottom:14px!important;text-align:justify!important;hyphens:auto;-webkit-hyphens:auto}
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) #frm-style-list > label.description,
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) .blocoPadrao label.description:not(.decl-veracidade){font-size:13.5px!important;line-height:1.5!important;text-align:left!important}
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) .fgv-field > label,
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) fieldset label:not(.description){font-size:14px!important}
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) label.decl-veracidade{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:10px!important;font-size:13px!important;line-height:1.55!important;text-align:justify!important;hyphens:auto;-webkit-hyphens:auto;padding:14px!important}
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) label.decl-veracidade input[type=checkbox]{margin:0!important;width:24px!important;height:24px!important}
+  html body:not(#vn_a):not(#vn_b):not(#vn_c) fieldset{padding-left:14px!important;padding-right:14px!important}
+}
