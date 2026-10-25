@@ -107,3 +107,4 @@ html body:not(#vn_a):not(#vn_b):not(#vn_c) input[name=termo]{width:24px!importan
   html body:not(#vn_a):not(#vn_b):not(#vn_c) .blocoPadrao table td{border-bottom-width:0!important}
 }
 html body:not(#vn_a):not(#vn_b):not(#vn_c) .wrap a.back.nova{background:#3576fb!important;color:#fff!important;border-color:#3576fb!important}
+html body:not(#vn_a):not(#vn_b):not(#vn_c) .wrap .acoes-mi{margin-top:28px!important}
