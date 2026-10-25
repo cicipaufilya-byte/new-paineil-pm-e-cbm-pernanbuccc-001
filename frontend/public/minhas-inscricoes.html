@@ -115,9 +115,11 @@ h1.t{color:var(--ink);font-size:26px;font-weight:800;margin:0 0 6px;padding:0 4p
     e.preventDefault();msg.style.display='none';
     var cpf=inp.value.replace(/\D/g,'');
     if(cpf.length!==11){msg.textContent='Informe um CPF válido com 11 dígitos.';msg.style.display='block';return;}
-    fetch('/api/inscricao/resumo/'+cpf).then(function(r){return r.ok?r.json():null;}).then(function(j){
-      if(!j){lista.innerHTML='';msg.textContent='Nenhuma inscrição encontrada para este CPF.';msg.style.display='block';return;}
-      lista.innerHTML='';card({protocolo:j.protocolo,nome:j.nome,cpf:String(j.cpf||cpf).replace(/\D/g,'').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'),cargo:j.cargo_titulo,taxa:j.taxa},'/pagamento-pix.html?cpf='+cpf);
+    fetch('/api/inscricao/lista/'+cpf).then(function(r){return r.ok?r.json():null;}).then(function(j){
+      if(!j||!j.items||!j.items.length){lista.innerHTML='';msg.textContent='Nenhuma inscrição encontrada para este CPF.';msg.style.display='block';return;}
+      var fc=cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4');
+      lista.innerHTML='';
+      j.items.forEach(function(it){ card({protocolo:it.protocolo,nome:it.nome,cpf:fc,cargo:it.cargo_titulo,taxa:it.taxa},'/pagamento-pix.html?cpf='+cpf+'&cargo='+encodeURIComponent(it.cargo_codigo)); });
     }).catch(function(){msg.textContent='Não foi possível consultar agora. Tente novamente.';msg.style.display='block';});
   });
 })();
