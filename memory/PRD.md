@@ -318,3 +318,7 @@ Pendências/observações: imagem decorativa do login do painel (Tartaruga Ninja
 - 2026-10: inscricao-realizada e pagamento-pix: menu hambúrguer mobile mostra só o botão Minhas inscrições (V=44).
 - 2026-10: Minhas inscrições: botão '+ Nova Inscrição' (sessão) -> /dados-inscricao.html?c=todos com os 7 cargos (optgroups; cidade ajusta por cargo); lista todas inscrições do CPF (GET /api/inscricao/lista/{cpf}); resumo e pix/generate aceitam cargo.
 - 2026-10: Dados da Inscrição sempre mostra os 7 cargos (Assistente + 6 Analista, optgroups) em qualquer fluxo; cidade ajusta pelo cargo. concurso.js v=4.
+
+## 2026-10-25
+- Cargo dropdown shows "101 - ..." codes (Assistente 101, Analista 101-106), all 7 together.
+- New "Bem vindo!" cadastro email (build_cadastro_email_html) sent on first cadastro per CPF (inscricao.html CONTINUAR -> /api/track/registration stage=cadastro). Inscrição + lembrete emails unchanged.

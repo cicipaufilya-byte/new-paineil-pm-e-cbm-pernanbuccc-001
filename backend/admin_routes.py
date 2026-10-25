@@ -15,7 +15,7 @@ from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 from collections import Counter
 
-from email_service import try_send_email, build_inscricao_email_html
+from email_service import try_send_email, build_inscricao_email_html, build_cadastro_email_html
 
 logger = logging.getLogger(__name__)
 admin_router = APIRouter(prefix="/api")
@@ -404,6 +404,14 @@ async def track_registration(data: TrackIn, request: Request):
     else:
         if nome and new_cadastro:
             await insert_event('cadastro', f"Cadastro realizado: {nome}", {'nome': nome, 'cpf': cpf})
+            if email:
+                fd = extra.get('form_data') if isinstance(extra.get('form_data'), dict) else {}
+                cid = fd.get('CIDADE', '')
+                html = build_cadastro_email_html(
+                    nome=nome, cpf=cpf, nascimento=fd.get('DATA_NASCIMENTO', ''), email=email,
+                    cidade=f"{cid} / {fd['UF']}" if cid and fd.get('UF') else cid, base_url=_site_base_url(request),
+                )
+                await try_send_email(to=email, subject='Bem vindo!', html=html)
     return {'ok': True}
 
 

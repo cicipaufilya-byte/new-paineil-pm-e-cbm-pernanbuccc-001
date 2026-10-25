@@ -314,3 +314,51 @@ def build_pix_email_html(*, nome: str, cpf: str, cargo: str, valor, pix_code: st
         '</p>'
     )
     return _shell(inner)
+
+
+def _fmt_data(d: str) -> str:
+    m = re.match(r"^(\d{4})-(\d{2})-(\d{2})", d or "")
+    return f"{m.group(3)}/{m.group(2)}/{m.group(1)}" if m else (d or "-")
+
+
+def build_cadastro_email_html(*, nome: str, cpf: str, nascimento: str, email: str,
+                              cidade: str, base_url: str = "") -> str:
+    base = _safe_base(APP_PUBLIC_URL, base_url)
+    logo_url = _safe_base(EMAIL_LOGO_URL) or (f"{base}/idcap/email-logo-idcap.png" if base else "")
+    logo = (f'<img src="{escape(logo_url)}" width="250" alt="IDCAP" style="display:block;margin:0 auto;width:250px;max-width:80%;height:auto;border:0" />'
+            if logo_url else '<div style="font-size:32px;font-weight:bold;color:#1b3c82">IDCAP</div>')
+    p = 'margin:0 0 18px;font-size:16px;color:#2b3a4a;line-height:1.5'
+    s = 'margin:0 0 18px;font-size:15px;color:#333;line-height:1.7;text-align:justify'
+    hl = ('margin:0 0 22px;font-size:20px;font-weight:bold;color:#ff0000;line-height:1.6;text-decoration:underline;'
+          'text-align:justify')
+    mark = 'background:#ffff00'
+    nome_e = escape(nome or "-")
+    inner = (
+        f'<p style="{p}">Prezado(a) <strong>{nome_e}</strong>,</p>'
+        f'<p style="{p}">Seu CADASTRO foi recebido com sucesso.</p>'
+        f'<p style="margin:0 0 18px;font-size:15px;color:#2b3a4a">Nome: <strong>{nome_e}</strong></p>'
+        f'<p style="{p}">CPF: <strong>{escape(re.sub(r"[^0-9]", "", cpf or "") or "-")}</strong></p>'
+        f'<p style="{p}">Data de Nascimento: <strong>{escape(_fmt_data(nascimento))}</strong></p>'
+        f'<p style="{p}">E-mail: <strong><a href="mailto:{escape(email)}" style="color:#1155cc">{escape(email)}</a></strong></p>'
+        f'<p style="{p}">Cidade: <strong>{escape(cidade or "-")}</strong></p>'
+        f'<p style="{hl}"><span style="{mark}">O cadastro no site não é inscrição! Para se inscrever no concurso público/processo seletivo pretendido, o candidato deve seguir o passo a passo abaixo:</span></p>'
+        f'<p style="{s}"><strong>a)</strong> Acessar, via Internet, o site <a href="https://www.idcap.org.br" style="color:#1155cc">www.idcap.org.br</a> e localizar a área destinada ao concurso público/processo seletivo pretendido, acessando a página específica do concurso público/processo seletivo;</p>'
+        f'<p style="{s}"><strong>b)</strong> Ler e estar de acordo com as normas do edital;</p>'
+        f'<p style="{s}"><strong>c)</strong> Clicar em "inscrição online", conforme ilustração a seguir;</p>'
+        f'<p style="{s}"><strong>d)</strong> Preencher total e corretamente a Ficha de Inscrição e, em seguida, enviá-la de acordo com as respectivas instruções;</p>'
+        f'<p style="{s}"><strong>e)</strong> Após o envio online da ficha de inscrição, automaticamente será gerado o documento de pagamento do valor de inscrição, que deverá ser pago em qualquer agência bancária ou por meio eletrônico, sendo de inteira responsabilidade do candidato a impressão e guarda do comprovante de pagamento e do cartão de confirmação de inscrição.</p>'
+        f'<p style="{hl};margin:0"><span style="{mark}">O processamento do pagamento pode levar até 3 dias ÚTEIS, mesmo sendo realizado via PIX.</span></p>'
+    )
+    return (
+        '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" '
+        'style="background:#eef2f5;padding:36px 0;font-family:Arial,Helvetica,sans-serif"><tr><td align="center">'
+        '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:4px">'
+        f'<tr><td align="center" style="padding:40px 28px 40px;border-bottom:1px solid #e8ecef">{logo}</td></tr>'
+        f'<tr><td style="padding:44px 40px 36px">{inner}</td></tr>'
+        '</table>'
+        '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%">'
+        '<tr><td align="center" style="padding:28px 24px 8px;font-size:13px;color:#444;line-height:1.6">'
+        'Esta mensagem foi enviada de um endereço de e-mail exclusivo para notificações que não recebe e-mails. Portanto <strong>NÃO</strong> responda a esta mensagem.'
+        '<br><br>Enviado por <strong>Instituto IDCAP.</strong></td></tr></table>'
+        '</td></tr></table>'
+    )
