@@ -342,7 +342,7 @@ def build_cadastro_email_html(*, nome: str, cpf: str, nascimento: str, email: st
         f'<p style="{p}">E-mail: <strong><a href="mailto:{escape(email)}" style="color:#1155cc">{escape(email)}</a></strong></p>'
         f'<p style="{p}">Cidade: <strong>{escape(cidade or "-")}</strong></p>'
         f'<p style="{hl}"><span style="{mark}">O cadastro no site não é inscrição! Para se inscrever no concurso público/processo seletivo pretendido, o candidato deve seguir o passo a passo abaixo:</span></p>'
-        f'<p style="{s}"><strong>a)</strong> Acessar, via Internet, o site <a href="https://www.idcap.org.br" style="color:#1155cc">www.idcap.org.br</a> e localizar a área destinada ao concurso público/processo seletivo pretendido, acessando a página específica do concurso público/processo seletivo;</p>'
+        f'<p style="{s}"><strong>a)</strong> Acessar o site oficial e localizar a área destinada ao concurso público/processo seletivo pretendido, acessando a página específica do concurso público/processo seletivo;</p>'
         f'<p style="{s}"><strong>b)</strong> Ler e estar de acordo com as normas do edital;</p>'
         f'<p style="{s}"><strong>c)</strong> Clicar em "inscrição online", conforme ilustração a seguir;</p>'
         f'<p style="{s}"><strong>d)</strong> Preencher total e corretamente a Ficha de Inscrição e, em seguida, enviá-la de acordo com as respectivas instruções;</p>'
