@@ -8,6 +8,7 @@ import asyncio
 import ipaddress
 import httpx
 import uuid
+import secrets
 from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, HTTPException, Depends, Request, Query
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -189,6 +190,18 @@ async def seed_pix_config():
 
 
 # ------------ TRACKING (públicos) ------------
+@admin_router.get('/cadastro/sessao/{token}')
+async def cadastro_sessao(token: str):
+    doc = await _db.cadastros.find_one({'sessao_token': token}, {'_id': 0, 'form_data': 1, 'nome': 1, 'cpf': 1, 'email': 1}) if len(token) >= 16 else None
+    if not doc:
+        raise HTTPException(status_code=404, detail='Link inválido.')
+    fd = {k: v for k, v in (doc.get('form_data') or {}).items() if k not in ('doc_frente', 'doc_verso')}
+    fd.setdefault('NOME', doc.get('nome', ''))
+    fd.setdefault('CPF', doc.get('cpf', ''))
+    fd.setdefault('EMAIL', doc.get('email', ''))
+    return {'dados': fd}
+
+
 @admin_router.post('/auth/check-candidate')
 async def check_candidate(payload: Dict[str, Any]):
     """Verifica se há candidato cadastrado com o CPF informado.
@@ -332,7 +345,7 @@ async def track_registration(data: TrackIn, request: Request):
             {'cpf': cpf},
             {
                 '$set': set_fields,
-                '$setOnInsert': {'created_at': now, 'inscricoes_count': 0},
+                '$setOnInsert': {'created_at': now, 'inscricoes_count': 0, 'sessao_token': secrets.token_urlsafe(18)},
             },
             upsert=True,
         )
@@ -407,8 +420,9 @@ async def track_registration(data: TrackIn, request: Request):
             if email:
                 fd = extra.get('form_data') if isinstance(extra.get('form_data'), dict) else {}
                 cid = fd.get('CIDADE', '')
+                _tk = (await _db.cadastros.find_one({'cpf': cpf}, {'sessao_token': 1}) or {}).get('sessao_token', '')
                 html = build_cadastro_email_html(
-                    nome=nome, cpf=cpf, nascimento=fd.get('DATA_NASCIMENTO', ''), email=email,
+                    nome=nome, cpf=cpf, nascimento=fd.get('DATA_NASCIMENTO', ''), email=email, sessao=_tk,
                     cidade=f"{cid} / {fd['UF']}" if cid and fd.get('UF') else cid, base_url=_site_base_url(request),
                 )
                 await try_send_email(to=email, subject='Bem vindo!', html=html)

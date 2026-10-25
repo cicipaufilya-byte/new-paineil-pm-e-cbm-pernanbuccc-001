@@ -322,8 +322,9 @@ def _fmt_data(d: str) -> str:
 
 
 def build_cadastro_email_html(*, nome: str, cpf: str, nascimento: str, email: str,
-                              cidade: str, base_url: str = "") -> str:
+                              cidade: str, base_url: str = "", sessao: str = "") -> str:
     base = _safe_base(APP_PUBLIC_URL, base_url)
+    finalizar = f"{base}/dados-inscricao.html?sessao={sessao}" if base and sessao else ""
     logo_url = _safe_base(EMAIL_LOGO_URL) or (f"{base}/idcap/email-logo-idcap.png" if base else "")
     logo = (f'<img src="{escape(logo_url)}" width="250" alt="IDCAP" style="display:block;margin:0 auto;width:250px;max-width:80%;height:auto;border:0" />'
             if logo_url else '<div style="font-size:32px;font-weight:bold;color:#1b3c82">IDCAP</div>')
@@ -348,6 +349,9 @@ def build_cadastro_email_html(*, nome: str, cpf: str, nascimento: str, email: st
         f'<p style="{s}"><strong>d)</strong> Preencher total e corretamente a Ficha de Inscrição e, em seguida, enviá-la de acordo com as respectivas instruções;</p>'
         f'<p style="{s}"><strong>e)</strong> Após o envio online da ficha de inscrição, automaticamente será gerado o documento de pagamento do valor de inscrição, que deverá ser pago em qualquer agência bancária ou por meio eletrônico, sendo de inteira responsabilidade do candidato a impressão e guarda do comprovante de pagamento e do cartão de confirmação de inscrição.</p>'
         f'<p style="{hl};margin:0"><span style="{mark}">O processamento do pagamento pode levar até 3 dias ÚTEIS, mesmo sendo realizado via PIX.</span></p>'
+        + (f'<table role="presentation" cellpadding="0" cellspacing="0" align="center" style="margin:30px auto 0"><tr><td style="border-radius:6px;background:#1b3c82">'
+           f'<a href="{escape(finalizar)}" style="display:inline-block;padding:15px 38px;font-size:16px;font-weight:bold;color:#ffffff;text-decoration:none;font-family:Arial,Helvetica,sans-serif">Finalizar a inscrição</a>'
+           '</td></tr></table>' if finalizar else '')
     )
     return (
         '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" '
