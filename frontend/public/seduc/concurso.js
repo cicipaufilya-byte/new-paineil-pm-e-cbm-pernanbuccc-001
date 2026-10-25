@@ -3,7 +3,7 @@
     assistente: {
       nome: 'Assistente Administrativo',
       nivel: 'Nível Médio',
-      cargos: [{v: '1', t: 'Assistente Administrativo', p: '90.00'}],
+      cargos: [{v: '1', n: '101', t: 'Assistente Administrativo', p: '90.00'}],
       cidades: [['MACAPA/AP', 'MACAPÁ/AP'], ['SANTANA/AP', 'SANTANA/AP']],
       pagina: '/assistente-administrativo.html'
     },
@@ -44,7 +44,7 @@
     var vaga = document.getElementById('VAGA');
     if (vaga && !vaga.dataset.cfg) {
       vaga.dataset.cfg = key;
-      var opt = function(c){ return '<option value="' + c.v + '" data-price="' + c.p + '">' + c.t + '</option>'; };
+      var opt = function(c){ return '<option value="' + c.v + '" data-price="' + c.p + '">' + (c.n || c.v) + '  -  ' + c.t + '</option>'; };
       vaga.innerHTML = '<option value="">Selecione</option>'
         + '<optgroup label="Assistente Administrativo (Nível Médio) - R$ 90,00">' + C.assistente.cargos.map(opt).join('') + '</optgroup>'
         + '<optgroup label="Analista (Nível Superior) - R$ 120,00">' + C.analista.cargos.map(opt).join('') + '</optgroup>';
