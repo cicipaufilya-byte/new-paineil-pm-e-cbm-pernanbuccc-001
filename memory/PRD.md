@@ -317,3 +317,4 @@ Pendências/observações: imagem decorativa do login do painel (Tartaruga Ninja
 - 2026-10: flow.css mobile para dados-inscricao, confirmacao (linhas rótulo|valor), inscricao-realizada, pagamento-pix (QR 200px, código 12px), minhas-inscricoes. concurso.js v=2 corrige select de cargo vazio. V=43.
 - 2026-10: inscricao-realizada e pagamento-pix: menu hambúrguer mobile mostra só o botão Minhas inscrições (V=44).
 - 2026-10: Minhas inscrições: botão '+ Nova Inscrição' (sessão) -> /dados-inscricao.html?c=todos com os 7 cargos (optgroups; cidade ajusta por cargo); lista todas inscrições do CPF (GET /api/inscricao/lista/{cpf}); resumo e pix/generate aceitam cargo.
+- 2026-10: Dados da Inscrição sempre mostra os 7 cargos (Assistente + 6 Analista, optgroups) em qualquer fluxo; cidade ajusta pelo cargo. concurso.js v=4.

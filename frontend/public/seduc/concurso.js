@@ -42,7 +42,7 @@
       if (cur[k] != null) el.textContent = cur[k];
     });
     var vaga = document.getElementById('VAGA');
-    if (vaga && !vaga.dataset.cfg && cur.todos) {
+    if (vaga && !vaga.dataset.cfg) {
       vaga.dataset.cfg = key;
       var opt = function(c){ return '<option value="' + c.v + '" data-price="' + c.p + '">' + c.t + '</option>'; };
       vaga.innerHTML = '<option value="">Selecione</option>'
@@ -77,7 +77,7 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fill); else fill();
   window.addEventListener('load', function(){
     var v=document.getElementById('VAGA'); if (!v) return;
-    if (cur.todos) { var sv=''; try{ sv=(JSON.parse(localStorage.getItem('inscricao_dados')||'{}').VAGA)||''; }catch(e){} v.value = sv; v.dispatchEvent(new Event('change', {bubbles:true})); }
+    { var sv=''; try{ sv=(JSON.parse(localStorage.getItem('inscricao_dados')||'{}').VAGA)||''; }catch(e){} v.value = sv; v.dispatchEvent(new Event('change', {bubbles:true})); }
     if (v.selectedIndex < 0) v.selectedIndex = 0;
   });
 })();
