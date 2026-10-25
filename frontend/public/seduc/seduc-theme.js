@@ -1,5 +1,5 @@
 (function(){
-var V='44';
+var V='45';
 function fontsLink(){
  if(document.getElementById('ceb-fonts'))return;
  var l=document.createElement('link');l.id='ceb-fonts';l.rel='stylesheet';l.href='/idcap/fonts.css?v='+V;document.head.appendChild(l);

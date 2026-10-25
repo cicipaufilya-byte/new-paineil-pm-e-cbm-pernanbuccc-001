@@ -1371,8 +1371,11 @@ async def generate_pix_brcode(payload: Dict[str, Any]):
     # quando existir, ignorando qualquer valor divergente enviado pelo cliente.
     cpf_lookup = re.sub(r'\D', '', (payload.get('cpf') or '') or '')
     if cpf_lookup:
+        _f = {'cpf': cpf_lookup}
+        if payload.get('cargo_codigo'):
+            _f['cargo_codigo'] = str(payload.get('cargo_codigo'))
         insc = await _db.inscricoes.find_one(
-            {'cpf': cpf_lookup},
+            _f,
             {'valor': 1},
             sort=[('created_at', -1)],
         )
@@ -1440,12 +1443,15 @@ async def generate_pix_brcode(payload: Dict[str, Any]):
 
 
 @admin_router.get('/inscricao/resumo/{cpf}')
-async def inscricao_resumo(cpf: str):
+async def inscricao_resumo(cpf: str, cargo: str = ''):
     """Resumo público da última inscrição por CPF (usado pelo deep-link do e-mail)."""
     digits = re.sub(r'\D', '', cpf or '')
     if not digits:
         raise HTTPException(status_code=404, detail='CPF inválido')
-    doc = await _db.inscricoes.find_one({'cpf': digits}, sort=[('created_at', -1)])
+    f = {'cpf': digits}
+    if cargo:
+        f['cargo_codigo'] = cargo
+    doc = await _db.inscricoes.find_one(f, sort=[('created_at', -1)])
     if not doc:
         raise HTTPException(status_code=404, detail='Inscrição não encontrada')
     return {
@@ -1458,6 +1464,22 @@ async def inscricao_resumo(cpf: str):
         'protocolo': doc.get('protocolo', ''),
         'concurso': doc.get('concurso', ''),
     }
+
+
+@admin_router.get('/inscricao/lista/{cpf}')
+async def inscricao_lista(cpf: str):
+    digits = re.sub(r'\D', '', cpf or '')
+    if len(digits) != 11:
+        raise HTTPException(status_code=404, detail='CPF inválido')
+    out = []
+    async for doc in _db.inscricoes.find({'cpf': digits, 'finalized': True}).sort('created_at', -1):
+        out.append({
+            'nome': doc.get('nome', ''), 'cpf': digits,
+            'cargo_titulo': doc.get('cargo_titulo', ''), 'cargo_codigo': doc.get('cargo_codigo', ''),
+            'valor': float(doc.get('valor') or VALOR_INSCRICAO), 'taxa': fmt_taxa(doc.get('valor') or VALOR_INSCRICAO),
+            'protocolo': doc.get('protocolo', ''),
+        })
+    return {'items': out}
 
 
 @admin_router.get('/pix/qr.png')

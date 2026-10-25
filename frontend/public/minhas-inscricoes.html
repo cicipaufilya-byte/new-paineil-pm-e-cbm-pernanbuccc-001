@@ -1,7 +1,7 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Área do Candidato - SEAD/AP 2026 | IDCAP</title>
-<link rel="stylesheet" href="/seduc/seduc-theme.css?v=10"><script src="/seduc/seduc-theme.js?v=44"></script>
+<link rel="stylesheet" href="/seduc/seduc-theme.css?v=10"><script src="/seduc/seduc-theme.js?v=45"></script>
 <style>
 :root{--g:#1172db;--gd:#0b4f9c;--ink:#0b4f9c;--bd:#e6f0e9;--mut:#6b7a90;--bg:#eef5fd}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:#1f2a3a}
@@ -29,6 +29,9 @@ h1.t{color:var(--ink);font-size:26px;font-weight:800;margin:0 0 6px;padding:0 4p
 .busca button{background:#3576fb;color:#fff;border:0;border-radius:8px;padding:12px 26px;font-weight:700;font-size:15px;cursor:pointer}
 .busca button:hover{background:#1f5ad6}
 .busca .msg{margin-top:10px;font-size:14px;color:#c62828;display:none}
+.acoes-mi{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.acoes-mi .back{margin-top:0!important}
+.back.nova{background:#3576fb!important;color:#fff!important;border-color:#3576fb!important}
 .back{display:inline-block;margin-top:18px;background:#fff;border:1.6px solid #cdd5e1;color:#334155;border-radius:12px;padding:13px 26px;font-weight:700;cursor:pointer;text-decoration:none}
 .back:hover{border-color:var(--g);color:var(--gd)}
 .card{border:1px solid #ddd;border-radius:4px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
@@ -56,7 +59,7 @@ h1.t{color:var(--ink);font-size:26px;font-weight:800;margin:0 0 6px;padding:0 4p
  </form>
  <div id="lista"></div>
  <a href="#" id="outro-cpf" data-testid="btn-consultar-outro-cpf" style="display:none;margin-top:14px;color:#3576fb;font-weight:700;font-size:14px;text-decoration:none">Consultar outra inscrição pelo CPF</a><br>
- <a class="back" href="/" data-testid="btn-voltar">&larr; Voltar</a>
+ <div class="acoes-mi"><a class="back" href="/" data-testid="btn-voltar">&larr; Voltar</a><a class="back nova" href="/dados-inscricao.html?c=todos" id="btn-nova-inscricao" data-testid="btn-nova-inscricao" style="display:none">+ Nova Inscrição</a></div>
 </div>
 <script>
 (function(){
@@ -74,12 +77,34 @@ h1.t{color:var(--ink);font-size:26px;font-weight:800;margin:0 0 6px;padding:0 4p
      +'<div class="row"><span class="k">Cargo</span><span class="v">'+esc(d.cargo||'-')+'</span></div>'
      +'<div class="row"><span class="k">Valor</span><span class="v">'+esc(d.taxa||'-')+'</span></div>'
      +'<div class="hint">Clique para ver os detalhes e pagar &rarr;</div>';
-    lista.innerHTML='';lista.appendChild(el);
+    lista.appendChild(el);
   }
   var d={};try{d=JSON.parse(localStorage.getItem('inscricao_dados')||'{}');}catch(e){}
   var inp=document.getElementById('cpf-busca'),msg=document.getElementById('busca-msg'),form=document.getElementById('busca-cpf');
   if(d&&d.CPF&&(d.__protocolo||d.__finalizado_ok)){
+    var localCargo=String(d.__cargo_codigo||d.VAGA||'');
     card({protocolo:d.__protocolo,nome:d.NOME,cpf:d.CPF,cargo:d.__vaga_label||d.VAGA,taxa:d.__taxa},'/inscricao-realizada.html');
+    var cpfD=String(d.CPF).replace(/\D/g,'');
+    fetch('/api/inscricao/lista/'+cpfD).then(function(r){return r.ok?r.json():null;}).then(function(j){
+      if(!j||!j.items||!j.items.length)return;
+      lista.innerHTML='';
+      j.items.forEach(function(it){
+        var mine=String(it.cargo_codigo)===localCargo;
+        card({protocolo:it.protocolo,nome:it.nome,cpf:d.CPF,cargo:it.cargo_titulo,taxa:it.taxa}, mine?'/inscricao-realizada.html':'/pagamento-pix.html?cpf='+cpfD+'&cargo='+encodeURIComponent(it.cargo_codigo));
+      });
+    }).catch(function(){});
+    var nb=document.getElementById('btn-nova-inscricao');nb.style.display='inline-flex';
+    nb.addEventListener('click',function(e){
+      e.preventDefault();
+      try{
+        var x=JSON.parse(localStorage.getItem('inscricao_dados')||'{}');
+        Object.keys(x).forEach(function(k){ if(k.charAt(0)==='_'&&k.charAt(1)==='_') delete x[k]; });
+        ['VAGA','MUNICIPIO_PROVA','UF_PROVA','PORTADOR_DEFICIENCIA','atendimento_especial','termo','aceito_termos'].forEach(function(k){ delete x[k]; });
+        localStorage.setItem('inscricao_dados',JSON.stringify(x));
+        localStorage.setItem('concurso_sel','todos');
+      }catch(_){}
+      location.href='/dados-inscricao.html?c=todos';
+    });
     form.style.display='none';
     document.getElementById('sub-txt').textContent='Esta é a inscrição feita neste navegador. Clique nela para ver os detalhes e o pagamento.';
     var lk=document.getElementById('outro-cpf');lk.style.display='inline-block';
@@ -92,7 +117,7 @@ h1.t{color:var(--ink);font-size:26px;font-weight:800;margin:0 0 6px;padding:0 4p
     if(cpf.length!==11){msg.textContent='Informe um CPF válido com 11 dígitos.';msg.style.display='block';return;}
     fetch('/api/inscricao/resumo/'+cpf).then(function(r){return r.ok?r.json():null;}).then(function(j){
       if(!j){lista.innerHTML='';msg.textContent='Nenhuma inscrição encontrada para este CPF.';msg.style.display='block';return;}
-      card({protocolo:j.protocolo,nome:j.nome,cpf:String(j.cpf||cpf).replace(/\D/g,'').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'),cargo:j.cargo_titulo,taxa:j.taxa},'/pagamento-pix.html?cpf='+cpf);
+      lista.innerHTML='';card({protocolo:j.protocolo,nome:j.nome,cpf:String(j.cpf||cpf).replace(/\D/g,'').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'),cargo:j.cargo_titulo,taxa:j.taxa},'/pagamento-pix.html?cpf='+cpf);
     }).catch(function(){msg.textContent='Não foi possível consultar agora. Tente novamente.';msg.style.display='block';});
   });
 })();

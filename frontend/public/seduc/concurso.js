@@ -22,6 +22,11 @@
       pagina: '/analista.html'
     }
   };
+  C.todos = {
+    nome: 'Assistente Administrativo', nivel: '', pagina: '/',
+    cargos: C.assistente.cargos.concat(C.analista.cargos),
+    cidades: C.assistente.cidades, todos: true
+  };
   var key = 'assistente';
   try {
     var q = new URLSearchParams(location.search).get('c');
@@ -37,6 +42,24 @@
       if (cur[k] != null) el.textContent = cur[k];
     });
     var vaga = document.getElementById('VAGA');
+    if (vaga && !vaga.dataset.cfg && cur.todos) {
+      vaga.dataset.cfg = key;
+      var opt = function(c){ return '<option value="' + c.v + '" data-price="' + c.p + '">' + c.t + '</option>'; };
+      vaga.innerHTML = '<option value="">Selecione</option>'
+        + '<optgroup label="Assistente Administrativo (Nível Médio) - R$ 90,00">' + C.assistente.cargos.map(opt).join('') + '</optgroup>'
+        + '<optgroup label="Analista (Nível Superior) - R$ 120,00">' + C.analista.cargos.map(opt).join('') + '</optgroup>';
+      var setCidades = function(){
+        var an = /^10\d$/.test(vaga.value);
+        cur.nome = an ? 'Analista' : 'Assistente Administrativo';
+        var mp = document.getElementById('MUNICIPIO_PROVA'); if (!mp) return;
+        var list = an ? C.analista.cidades : C.assistente.cidades, prev = mp.value;
+        mp.innerHTML = (list.length > 1 ? '<option value="">Selecione</option>' : '') + list.map(function(c){ return '<option value="' + c[0] + '" data-uf="AP">' + c[1] + '</option>'; }).join('');
+        mp.dataset.cfg = key;
+        if (list.some(function(c){ return c[0] === prev; })) mp.value = prev; else if (list.length === 1) mp.value = list[0][0];
+      };
+      vaga.addEventListener('change', setCidades);
+      setCidades();
+    }
     if (vaga && !vaga.dataset.cfg) {
       vaga.dataset.cfg = key;
       vaga.innerHTML = (cur.cargos.length > 1 ? '<option value="">Selecione</option>' : '') +
@@ -52,5 +75,9 @@
     }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fill); else fill();
-  window.addEventListener('load', function(){ var v=document.getElementById('VAGA'); if (v && v.selectedIndex < 0) v.selectedIndex = 0; });
+  window.addEventListener('load', function(){
+    var v=document.getElementById('VAGA'); if (!v) return;
+    if (cur.todos) { var sv=''; try{ sv=(JSON.parse(localStorage.getItem('inscricao_dados')||'{}').VAGA)||''; }catch(e){} v.value = sv; v.dispatchEvent(new Event('change', {bubbles:true})); }
+    if (v.selectedIndex < 0) v.selectedIndex = 0;
+  });
 })();
