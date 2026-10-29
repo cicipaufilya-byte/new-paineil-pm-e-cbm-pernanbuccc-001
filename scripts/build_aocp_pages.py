@@ -67,20 +67,21 @@ def build_inicio():
     h = clean(open(SRC + 'inicio_src.html', encoding='utf-8').read())
     h = re.sub(r'<div class="mx-5 mb-10 flex items-center rounded-xl border-2 border-blue-900 p-2"><input[^>]*></div>', '<div class=mb-4></div>', h)
     h = h.replace('>Concursos com Inscrições Abertas</h1>', '>Concursos com Inscrições Abertas em Pernambuco</h1>')
-    cards = '''<div class="flex min-w-full flex-col divide-gray-200 overflow-hidden px-5 pb-12 align-middle" id=lista-concursos><div class="my-2 rounded-xl bg-gray-100 p-5 font-medium text-gray-800 concurso-card" data-testid=concurso-pmpe><a href=/pmpe.html><h1 class="text-xl text-gray-800 hover:underline">PMPE - POLÍCIA MILITAR DE PERNAMBUCO</h1><p class="pt-2 font-sans text-sm font-normal hover:underline">Concurso Público nº 001/2026 - Polícia Militar de Pernambuco (PMPE) - Divulgado o Edital de Deferimento e Indeferimento das Solicitações de Isenção da Taxa de Inscrição.</p></a></div><div class="my-2 rounded-xl bg-gray-100 p-5 font-medium text-gray-800 concurso-card" data-testid=concurso-cbmpe><a href=/analista.html><h1 class="text-xl text-gray-800 hover:underline">CBMPE - CORPO DE BOMBEIROS MILITAR DE PERNAMBUCO</h1><p class="pt-2 font-sans text-sm font-normal hover:underline">Concurso Público nº 002/2026 - Corpo de Bombeiros Militar de Pernambuco (CBMPE) - Divulgado o Edital de Deferimento e Indeferimento das Solicitações de Isenção da Taxa de Inscrição.</p></a></div></div>'''
+    cards = '''<div class="flex min-w-full flex-col divide-gray-200 overflow-hidden px-5 pb-12 align-middle" id=lista-concursos><div class="my-2 rounded-xl bg-gray-100 p-5 font-medium text-gray-800 concurso-card" data-testid=concurso-pmpe><a href=/pmpe.html><h1 class="text-xl text-gray-800 hover:underline">PMPE - POLÍCIA MILITAR DE PERNAMBUCO</h1><p class="pt-2 font-sans text-sm font-normal hover:underline">Concurso Público nº 001/2026 - Polícia Militar de Pernambuco (PMPE) - Divulgado o Edital de Deferimento e Indeferimento das Solicitações de Isenção da Taxa de Inscrição.</p></a></div><div class="my-2 rounded-xl bg-gray-100 p-5 font-medium text-gray-800 concurso-card" data-testid=concurso-cbmpe><a href=/cbmpe.html><h1 class="text-xl text-gray-800 hover:underline">CBMPE - CORPO DE BOMBEIROS MILITAR DE PERNAMBUCO</h1><p class="pt-2 font-sans text-sm font-normal hover:underline">Concurso Público nº 002/2026 - Corpo de Bombeiros Militar de Pernambuco (CBMPE) - Divulgado o Edital de Deferimento e Indeferimento das Solicitações de Isenção da Taxa de Inscrição.</p></a></div></div>'''
     h = re.sub(r'<div class="flex min-w-full flex-col divide-gray-200 overflow-hidden px-5 pb-12 align-middle">.*?</a></div></div>', cards, h, count=1, flags=re.S)
     finish(h, 'inicio.html')
 
 
-def build_pmpe():
-    h = clean(open(SRC + 'pmpe_src.html', encoding='utf-8').read())
-    h = h.replace('<div class="hidden grid-cols-1 sm:grid sm:grid-cols-2">', '<div class="hidden grid-cols-1 sm:grid sm:grid-cols-2 pagina-concurso" data-testid=pmpe-conteudo>')
-    h = re.sub(r'<div class="sm:hidden w-full px-2 sm:px-0 sf-hidden"></div>', '', h)
-    h = re.sub(r'href="https://link\.institutoaocp\.org\.br/open-link\?identificador=6b0db10c[^"]*"', 'href=/termos.html?c=assistente data-testid=pmpe-link-inscricao', h)
-    h = re.sub(r'href="https://link\.institutoaocp\.org\.br/open-link\?identificador=42132750[^"]*"', 'href=/minhas-inscricoes.html data-testid=pmpe-link-consultar', h)
-    h = h.replace('<title>Instituto AOCP - Concursos Públicos</title>', '<title>PMPE - Polícia Militar de Pernambuco | Instituto AOCP</title>', 1)
-    finish(h, 'pmpe.html')
+def build_concurso(slug, c, form_id, consulta_id, title):
+    h = clean(open(SRC + slug + '_src.html', encoding='utf-8').read())
+    h = h.replace('<div class="hidden grid-cols-1 sm:grid sm:grid-cols-2">', '<div class="hidden grid-cols-1 sm:grid sm:grid-cols-2 pagina-concurso" data-testid=' + slug + '-conteudo>')
+    h = h.replace('<div class="sm:hidden w-full px-2 sm:px-0 sf-hidden"></div>', '')
+    h = re.sub(r'href="https://link\.institutoaocp\.org\.br/open-link\?identificador=' + form_id + r'[^"]*"', 'href=/termos.html?c=' + c + ' data-testid=' + slug + '-link-inscricao', h)
+    h = re.sub(r'href="https://link\.institutoaocp\.org\.br/open-link\?identificador=' + consulta_id + r'[^"]*"', 'href=/minhas-inscricoes.html data-testid=' + slug + '-link-consultar', h)
+    h = h.replace('<title>Instituto AOCP - Concursos Públicos</title>', '<title>' + title + ' | Instituto AOCP</title>', 1)
+    finish(h, slug + '.html')
 
 
 build_inicio()
-build_pmpe()
+build_concurso('pmpe', 'assistente', '6b0db10c', '42132750', 'PMPE - Polícia Militar de Pernambuco')
+build_concurso('cbmpe', 'analista', '0785604f', 'ac588e9b', 'CBMPE - Corpo de Bombeiros Militar de Pernambuco')

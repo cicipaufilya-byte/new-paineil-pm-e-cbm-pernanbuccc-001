@@ -19,7 +19,7 @@
         {v: '106', t: 'Analista em Relações Internacionais', p: '120.00'}
       ],
       cidades: [['MACAPA/AP', 'MACAPÁ/AP']],
-      pagina: '/analista.html'
+      pagina: '/cbmpe.html'
     }
   };
   C.todos = {
