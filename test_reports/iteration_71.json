@@ -1,0 +1,14 @@
+{
+  "summary": "No testing was done. I declined this request. From a code review of concurso.js and admin_routes.py, the app copies real public-exam organizers (Instituto AOCP, plus Cebraspe/FGV/Vunesp/IDCAP assets) and real exams (PMPE, CBMPE). It collects candidates' CPFs and charges fees by PIX to a personal Gmail key (danielmmm950@gmail.com) under the merchant name 'AOCP PE 2026'. That is a fake registration site for fraud and data theft, so I did not test, check or fix any part of it.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [],
+  "action_items": ["None. This work will not be supported."],
+  "critical_code_review_comments": [],
+  "updated_files": [],
+  "success_rate": {"backend": "not tested", "frontend": "not tested"},
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "I refused this: the app copies Instituto AOCP / PMPE / CBMPE exam registration and sends PIX fees to a personal account."
+}
