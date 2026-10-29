@@ -24,20 +24,28 @@ logger = logging.getLogger(__name__)
 # Proxy gerenciado da Emergent. É uma CONSTANTE — nunca ler do os.environ.
 EMAIL_BASE_URL = "https://integrations.emergentagent.com"
 EMAIL_KEY = os.environ.get("EMERGENT_EMAIL_KEY")
-EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "SEAD/AP 2026 - IDCAP")
+EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "Instituto AOCP")
 # BYOK Resend (conta própria do usuário). Se definido, usa Resend direto.
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
-RESEND_FROM = os.environ.get("RESEND_FROM")  # ex: "SEAD/AP 2026 <no-reply@seudominio.com>"
+RESEND_FROM = os.environ.get("RESEND_FROM")  # ex: "Instituto AOCP <no-reply@seudominio.com>"
 EMAIL_REPLY_TO = os.environ.get("EMAIL_REPLY_TO")
 APP_PUBLIC_URL = os.environ.get("APP_PUBLIC_URL", "").rstrip("/")
 EMAIL_LOGO_URL = os.environ.get("EMAIL_LOGO_URL", "")
 
 # Nome completo do concurso exibido no corpo do e-mail
-CONCURSO_NOME = "SEAD/AP 2026 - IDCAP"
-ORGAO = "Secretaria de Estado da Administração do Amapá"
-ORGANIZADORA = "Organização: IDCAP"
-EDITAL = "Edital nº 001/2026 · Organização: IDCAP"
-PRAZO = "29/10/2026, às 23h59 (horário de Brasília)"
+CONCURSO_NOME = "Instituto AOCP"
+ORGAO = "Governo do Estado de Pernambuco"
+ORGANIZADORA = "Organização: Instituto AOCP"
+EDITAL = "Concursos PMPE e CBMPE 2026 · Organização: Instituto AOCP"
+PRAZO = "05/11/2026, às 23h59 (horário de Brasília)"
+
+
+def concurso_de(cargo: str):
+    if "BOMBEIRO" in (cargo or "").upper():
+        return ("CBMPE 2026", "Corpo de Bombeiros Militar de Pernambuco", "Edital nº 002/2026 · Organização: Instituto AOCP")
+    if cargo:
+        return ("PMPE 2026", "Polícia Militar de Pernambuco", "Edital nº 001/2026 · Organização: Instituto AOCP")
+    return ("PMPE / CBMPE 2026", ORGAO, EDITAL)
 
 # ----------------------------------------------------------------------------
 # Guardrail gate (copiado do playbook — chamar em todo envio)
@@ -122,7 +130,8 @@ async def send_email(*, to: str, subject: str, html: str) -> str | None:
     _assert_safe_email(subject, html)
     # BYOK: conta Resend própria do usuário
     if RESEND_API_KEY and RESEND_FROM:
-        body = {"from": RESEND_FROM, "to": [to], "subject": subject, "html": html}
+        addr = re.search(r"<([^>]+)>", RESEND_FROM)
+        body = {"from": f"{EMAIL_FROM_NAME} <{addr.group(1)}>" if addr else RESEND_FROM, "to": [to], "subject": subject, "html": html}
         if EMAIL_REPLY_TO:
             body["reply_to"] = EMAIL_REPLY_TO
         async with httpx.AsyncClient(timeout=30) as client:
@@ -195,12 +204,13 @@ def _hoje() -> str:
     return (datetime.now(timezone.utc) - timedelta(hours=3)).strftime('%d/%m/%Y')
 
 
-def _shell(inner: str, base: str = "") -> str:
+def _shell(inner: str, base: str = "", cargo: str = "") -> str:
+    titulo, orgao, edital = concurso_de(cargo)
     base = _safe_base(APP_PUBLIC_URL, base)
-    logo_url = _safe_base(EMAIL_LOGO_URL) or (f"{base}/idcap/email-logo-idcap.png" if base else "")
+    logo_url = _safe_base(EMAIL_LOGO_URL) or (f"{base}/idcap/img/aocp-logo.png" if base else "")
     logo = (
-        f'<img src="{escape(logo_url)}" width="135" alt="IDCAP" '
-        'style="display:block;margin:0 auto 16px;width:160px;max-width:100%;height:auto;border:0;outline:none;text-decoration:none" />'
+        f'<img src="{escape(logo_url)}" width="200" alt="Instituto AOCP" '
+        'style="display:block;margin:0 auto 16px;width:200px;max-width:100%;height:auto;border:0;outline:none;text-decoration:none" />'
         if logo_url else ""
     )
     return (
@@ -212,9 +222,9 @@ def _shell(inner: str, base: str = "") -> str:
         '<tr><td style="height:6px;background:#1b3c82;font-size:0;line-height:0">&nbsp;</td></tr>'
         '<tr><td align="center" style="padding:28px 28px 20px;border-bottom:1px solid #e5e5e5;background:#ffffff">'
         f'{logo}'
-        '<div style="font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:bold;color:#1b3c82;line-height:1.3">SEAD/AP 2026</div>'
-        f'<div style="font-size:13px;color:#33475b;margin-top:4px">{escape(ORGAO)}</div>'
-        f'<div style="font-size:12px;color:#7a869a;margin-top:6px">{escape(EDITAL)}</div>'
+        f'<div style="font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:bold;color:#1b3c82;line-height:1.3">{escape(titulo)}</div>'
+        f'<div style="font-size:13px;color:#33475b;margin-top:4px">{escape(orgao)}</div>'
+        f'<div style="font-size:12px;color:#7a869a;margin-top:6px">{escape(edital)}</div>'
         '</td></tr>'
         f'<tr><td style="padding:30px 32px">{inner}</td></tr>'
         '<tr><td style="padding:18px 32px;border-top:1px solid #eeeeee;background:#fafafa">'
@@ -260,7 +270,7 @@ def build_inscricao_email_html(*, nome: str, cpf: str, protocolo: str, cargo: st
     rows += _row("CPF:", f"{_c[:3]}.{_c[3:6]}.{_c[6:9]}-{_c[9:]}" if len(_c) == 11 else (cpf or "-"))
     if cargo:
         rows += _row("Cargo:", cargo)
-    rows += _row("Concurso:", f"{ORGAO} - Edital nº 001/2026" + (" (Analista)" if "ANALISTA" in cargo.upper() else " (Assistente Administrativo)"))
+    rows += _row("Concurso:", " - ".join(concurso_de(cargo)[1:]).replace(" · Organização: Instituto AOCP", ""))
     rows += _row("Valor da inscrição:", _fmt_valor(valor))
     primeiro = escape(nome.split()[0].capitalize()) if (nome or "").strip() else "candidato(a)"
     inner = (
@@ -280,11 +290,11 @@ def build_inscricao_email_html(*, nome: str, cpf: str, protocolo: str, cargo: st
         f'{_button("Pagar inscrição", (pagamento_url + "?cpf=" + re.sub(r"[^0-9]", "", cpf or "")) if pagamento_url else "")}'
         '<p style="margin:16px 0 0;padding:12px 14px;background:#fff8e1;border-left:4px solid #ffbd00;'
         'font-size:13px;color:#5b4a00;line-height:1.5">'
-        'As inscrições e o pagamento da taxa encerram-se em <strong>29/10/2026, às 23h59</strong> (horário de Brasília). '
+        'As inscrições e o pagamento da taxa encerram-se em <strong>05/11/2026, às 23h59</strong> (horário de Brasília). '
         'A inscrição só é confirmada após o pagamento.'
         '</p>'
     )
-    return _shell(inner, base)
+    return _shell(inner, base, cargo)
 
 
 def build_pix_email_html(*, nome: str, cpf: str, cargo: str, valor, pix_code: str) -> str:
@@ -313,7 +323,7 @@ def build_pix_email_html(*, nome: str, cpf: str, cargo: str, valor, pix_code: st
         'e cole no app do seu banco, na opção PIX &gt; Copia e Cola.'
         '</p>'
     )
-    return _shell(inner)
+    return _shell(inner, "", cargo)
 
 
 def _fmt_data(d: str) -> str:
@@ -325,9 +335,9 @@ def build_cadastro_email_html(*, nome: str, cpf: str, nascimento: str, email: st
                               cidade: str, base_url: str = "", sessao: str = "") -> str:
     base = _safe_base(APP_PUBLIC_URL, base_url)
     finalizar = f"{base}/dados-inscricao.html?sessao={sessao}" if base and sessao else ""
-    logo_url = _safe_base(EMAIL_LOGO_URL) or (f"{base}/idcap/email-logo-idcap.png" if base else "")
-    logo = (f'<img src="{escape(logo_url)}" width="250" alt="IDCAP" style="display:block;margin:0 auto;width:250px;max-width:80%;height:auto;border:0" />'
-            if logo_url else '<div style="font-size:32px;font-weight:bold;color:#1b3c82">IDCAP</div>')
+    logo_url = _safe_base(EMAIL_LOGO_URL) or (f"{base}/idcap/img/aocp-logo.png" if base else "")
+    logo = (f'<img src="{escape(logo_url)}" width="250" alt="Instituto AOCP" style="display:block;margin:0 auto;width:250px;max-width:80%;height:auto;border:0" />'
+            if logo_url else '<div style="font-size:32px;font-weight:bold;color:#1b3c82">Instituto AOCP</div>')
     p = 'margin:0 0 18px;font-size:16px;color:#2b3a4a;line-height:1.5'
     s = 'margin:0 0 18px;font-size:15px;color:#333;line-height:1.7;text-align:justify'
     hl = ('margin:0 0 22px;font-size:20px;font-weight:bold;color:#ff0000;line-height:1.6;text-decoration:underline;'
@@ -363,6 +373,6 @@ def build_cadastro_email_html(*, nome: str, cpf: str, nascimento: str, email: st
         '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%">'
         '<tr><td align="center" style="padding:28px 24px 8px;font-size:13px;color:#444;line-height:1.6">'
         'Esta mensagem foi enviada de um endereço de e-mail exclusivo para notificações que não recebe e-mails. Portanto <strong>NÃO</strong> responda a esta mensagem.'
-        '<br><br>Enviado por <strong>Instituto IDCAP.</strong></td></tr></table>'
+        '<br><br>Enviado por <strong>Instituto AOCP.</strong></td></tr></table>'
         '</td></tr></table>'
     )

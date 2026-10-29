@@ -1,8 +1,9 @@
 (function(){
-var V='46';
+var V='47';
 function fontsLink(){
  if(document.getElementById('ceb-fonts'))return;
  var l=document.createElement('link');l.id='ceb-fonts';l.rel='stylesheet';l.href='/idcap/fonts.css?v='+V;document.head.appendChild(l);
+ var af=document.createElement('link');af.rel='stylesheet';af.href='/idcap/aocp-fonts.css?v='+V;document.head.appendChild(af);
  var f=document.createElement('link');f.id='idcap-flow';f.rel='stylesheet';f.href='/idcap/flow.css?v='+V;document.head.appendChild(f);
 }
 function host(id,html,cls,atTop){

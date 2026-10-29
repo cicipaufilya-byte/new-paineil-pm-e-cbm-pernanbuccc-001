@@ -160,14 +160,14 @@ TERMOS_MAIN = '''<div class="pt-20 termos-wrap"><main class=termos-sec data-test
  .termos-btn{width:100%}
 }
 </style>
-<script src="/seduc/concurso.js?v=5"></script>
+<script src="/seduc/concurso.js?v=6"></script>
 <script>
 (function(){
  var D={
-  assistente:{edital:'Concurso Público nº 001/2026',edital2:'Edital de Abertura nº 001/2026 – PMPE',orgao:'PMPE - Polícia Militar de Pernambuco',desc:'Secretaria de Administração e Secretaria de Defesa Social de Pernambuco',vagas:'70 Oficial · 1.250 Soldado',logo:'/idcap/img/pmpe-logo.jpg',page:'/pmpe.html'},
-  analista:{edital:'Concurso Público nº 002/2026',edital2:'Edital de Abertura nº 002/2026 – CBMPE',orgao:'CBMPE - Corpo de Bombeiros Militar de Pernambuco',desc:'Secretaria de Administração e Secretaria de Defesa Social de Pernambuco',vagas:'60 Oficial · 510 Soldado',logo:'/idcap/img/cbmpe-logo.jpg',page:'/cbmpe.html'}
+  pmpe:{edital:'Concurso Público nº 001/2026',edital2:'Edital de Abertura nº 001/2026 – PMPE',orgao:'PMPE - Polícia Militar de Pernambuco',desc:'Secretaria de Administração e Secretaria de Defesa Social de Pernambuco',vagas:'70 Oficial · 1.250 Soldado',logo:'/idcap/img/pmpe-logo.jpg',page:'/pmpe.html'},
+  cbmpe:{edital:'Concurso Público nº 002/2026',edital2:'Edital de Abertura nº 002/2026 – CBMPE',orgao:'CBMPE - Corpo de Bombeiros Militar de Pernambuco',desc:'Secretaria de Administração e Secretaria de Defesa Social de Pernambuco',vagas:'60 Oficial · 510 Soldado',logo:'/idcap/img/cbmpe-logo.jpg',page:'/cbmpe.html'}
  };
- var k=(window.SEAD_CONCURSO&&D[SEAD_CONCURSO.key])?SEAD_CONCURSO.key:'assistente', d=D[k];
+ var k=(window.SEAD_CONCURSO&&D[SEAD_CONCURSO.key])?SEAD_CONCURSO.key:'pmpe', d=D[k];
  document.getElementById('t-edital').textContent=d.edital;
  document.getElementById('t-edital2').textContent=d.edital2;
  document.getElementById('t-orgao').textContent=d.orgao;
@@ -195,6 +195,26 @@ def build_termos():
 
 
 build_inicio()
-build_concurso('pmpe', 'assistente', '6b0db10c', '42132750', 'PMPE - Polícia Militar de Pernambuco')
-build_concurso('cbmpe', 'analista', '0785604f', 'ac588e9b', 'CBMPE - Corpo de Bombeiros Militar de Pernambuco')
+build_concurso('pmpe', 'pmpe', '6b0db10c', '42132750', 'PMPE - Polícia Militar de Pernambuco')
+build_concurso('cbmpe', 'cbmpe', '0785604f', 'ac588e9b', 'CBMPE - Corpo de Bombeiros Militar de Pernambuco')
 build_termos()
+
+
+def build_chrome():
+    import json
+    h = clean(open(SRC + 'inicio_src.html', encoding='utf-8').read())
+    css = '\n'.join(re.findall(r'<style[^>]*>(.*?)</style>', h, flags=re.S))
+    fonts = '\n'.join(re.findall(r'@font-face\{[^}]*\}', css))
+    css = re.sub(r'@font-face\{[^}]*\}', '', css).replace(':root', ':root,:host')
+    head = re.search(r'<header .*?</header>', h, flags=re.S).group(0).replace('class="fixed z-50 flex', 'class="relative z-50 flex', 1)
+    foot = h[h.index('<footer>'):h.rindex('</footer>') + 9]
+    fix = lambda s: re.sub(r'href="?https?://[^ >"]+"?', 'href=#', re.sub(r'href=https://www\.institutoaocp\.org\.br/(?=[ >])', 'href=/inicio.html', s)).replace(' target=_blank', '')
+    extra = re.search(r'<style>(.*?)</style>', EXTRA, flags=re.S).group(1)
+    css += '\n.sfbody{font-family:__Oswald_32ffff,__Oswald_Fallback_32ffff,sans-serif;line-height:1.5;color:#1f2937}\n.sfbody img{display:inline-block}\n' + extra.replace('html,body{overflow-x:hidden}', '')
+    open(OUT + 'idcap/chrome.css', 'w', encoding='utf-8').write(css)
+    open(OUT + 'idcap/aocp-fonts.css', 'w', encoding='utf-8').write(fonts)
+    json.dump({'h': fix(head), 'f': fix(foot), 'cls': '__className_32ffff'}, open(OUT + 'idcap/parts.json', 'w', encoding='utf-8'), ensure_ascii=False)
+    print('chrome', len(css), len(fonts))
+
+
+build_chrome()

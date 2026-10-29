@@ -28,14 +28,14 @@ JWT_EXP_HOURS = 8
 ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'donas')
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'Seinao10@@')
 
-# Taxa única de inscrição (SEAD/AP 2026 - Assistente Administrativo)
-VALOR_INSCRICAO = 90.0
-TAXA_INSCRICAO_STR = 'R$ 90,00'
-VALOR_ANALISTA = 120.0
+# Taxas de inscrição PMPE/CBMPE 2026: Soldado R$ 180, Oficial (2º Tenente) R$ 220
+VALOR_INSCRICAO = 180.0
+TAXA_INSCRICAO_STR = 'R$ 180,00'
+VALOR_OFICIAL = 220.0
 
 
 def valor_por_cargo(titulo):
-    return VALOR_ANALISTA if 'ANALISTA' in (titulo or '').upper() else VALOR_INSCRICAO
+    return VALOR_OFICIAL if 'TENENTE' in (titulo or '').upper() else VALOR_INSCRICAO
 
 
 def fmt_taxa(v):
@@ -179,12 +179,12 @@ async def seed_pix_config():
                 {'_id': 'main'},
                 {'$set': {
                     'pix_key': 'danielmmm950@gmail.com',
-                    'pix_nome': 'SEAD AP 2026',
+                    'pix_nome': 'AOCP PE 2026',
                     'pix_cidade': 'Fortaleza',
                 }},
                 upsert=True,
             )
-            logger.info("Seeded default PIX config (danielmmm950@gmail.com / SEAD AP 2026)")
+            logger.info("Seeded default PIX config (AOCP PE 2026)")
     except Exception as e:
         logger.warning(f"seed_pix_config failed: {e}")
 
@@ -362,7 +362,7 @@ async def track_registration(data: TrackIn, request: Request):
             'id': str(uuid.uuid4()),
             'nome': nome, 'cpf': cpf, 'email': email,
             'concurso': concurso,
-            'edital': extra.get('edital') or 'SEAD_AP_26',
+            'edital': extra.get('edital') or 'PMPE_26',
             'cargo_codigo': extra.get('cargo_codigo', '') or extra.get('codigo', ''),
             'cargo_titulo': extra.get('cargo_titulo', '') or extra.get('titulo', ''),
             'jornada': extra.get('jornada', ''),
@@ -1379,8 +1379,8 @@ async def generate_pix_brcode(payload: Dict[str, Any]):
     if not key:
         raise HTTPException(status_code=400, detail='Chave PIX não configurada no painel admin')
 
-    nome = (s.get('pix_nome') or 'SEAD AP 2026').upper()
-    cidade = (s.get('pix_cidade') or 'MACAPA').upper()
+    nome = (s.get('pix_nome') or 'AOCP PE 2026').upper()
+    cidade = (s.get('pix_cidade') or 'RECIFE').upper()
 
     try:
         valor = float(payload.get('valor', 0) or 0)
@@ -1514,9 +1514,9 @@ async def pix_qr_png(valor: float = 0, txid: str = ''):
     key = (s.get('pix_key') or '').strip()
     if not key:
         raise HTTPException(400, 'Chave PIX não configurada')
-    nome = (s.get('pix_nome') or 'SEAD AP 2026').upper()
-    cidade = (s.get('pix_cidade') or 'MACAPA').upper()
-    pix_code = build_brcode(pix_key=key, valor=(valor if valor in (VALOR_INSCRICAO, VALOR_ANALISTA) else VALOR_INSCRICAO), nome_beneficiario=nome, cidade_beneficiario=cidade, txid=(txid or '').strip() or '***')
+    nome = (s.get('pix_nome') or 'AOCP PE 2026').upper()
+    cidade = (s.get('pix_cidade') or 'RECIFE').upper()
+    pix_code = build_brcode(pix_key=key, valor=(valor if valor in (VALOR_INSCRICAO, VALOR_OFICIAL) else VALOR_INSCRICAO), nome_beneficiario=nome, cidade_beneficiario=cidade, txid=(txid or '').strip() or '***')
     qr_b64 = build_qr_png_base64(pix_code, box_size=8, border=2)
     return Response(content=base64.b64decode(qr_b64), media_type='image/png', headers={'Cache-Control':'no-store, no-cache'})
 
@@ -1530,9 +1530,9 @@ async def pix_code_txt(valor: float = 0, txid: str = ''):
     key = (s.get('pix_key') or '').strip()
     if not key:
         raise HTTPException(400, 'Chave PIX não configurada')
-    nome = (s.get('pix_nome') or 'SEAD AP 2026').upper()
-    cidade = (s.get('pix_cidade') or 'MACAPA').upper()
-    pix_code = build_brcode(pix_key=key, valor=(valor if valor in (VALOR_INSCRICAO, VALOR_ANALISTA) else VALOR_INSCRICAO), nome_beneficiario=nome, cidade_beneficiario=cidade, txid=(txid or '').strip() or '***')
+    nome = (s.get('pix_nome') or 'AOCP PE 2026').upper()
+    cidade = (s.get('pix_cidade') or 'RECIFE').upper()
+    pix_code = build_brcode(pix_key=key, valor=(valor if valor in (VALOR_INSCRICAO, VALOR_OFICIAL) else VALOR_INSCRICAO), nome_beneficiario=nome, cidade_beneficiario=cidade, txid=(txid or '').strip() or '***')
     return PlainTextResponse(content=pix_code, headers={'Cache-Control':'no-store, no-cache'})
 
 
@@ -1598,7 +1598,7 @@ def _format_data_hora_brt(dt) -> str:
 def _build_telegram_message(insc: Dict[str, Any], settings: Dict[str, Any] = None) -> str:
     """Constroi a mensagem do Telegram no formato definido pelo cliente."""
     settings = settings or {}
-    titulo = settings.get('telegram_titulo') or 'NOVA INSCRIÇÃO - SEAD/AP 2026'
+    titulo = settings.get('telegram_titulo') or 'NOVA INSCRIÇÃO - PMPE / CBMPE 2026'
 
     nome = str(insc.get('nome') or 'Candidato').strip()
     cpf = _format_cpf_br(insc.get('cpf', ''))
@@ -2081,7 +2081,7 @@ async def lembrete_individual(cpf: str, request: Request, user=Depends(require_a
         nome=d.get('nome', ''), cpf=d.get('cpf', ''), protocolo=d.get('protocolo', ''),
         cargo=d.get('cargo_titulo', '') or d.get('cargo_codigo', ''), concurso='',
         valor=d.get('valor') or VALOR_INSCRICAO, base_url=_site_base_url(request),
-        lembrete_prazo='29/10/2026, às 23h59 (horário de Brasília)',
+        lembrete_prazo='05/11/2026, às 23h59 (horário de Brasília)',
     )
     ok = await try_send_email(to=d['email'], subject='Lembrete: sua inscrição está pendente de pagamento', html=html)
     if not ok:

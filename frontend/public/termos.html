@@ -60,14 +60,14 @@
  .termos-btn{width:100%}
 }
 </style>
-<script src="/seduc/concurso.js?v=5"></script>
+<script src="/seduc/concurso.js?v=6"></script>
 <script>
 (function(){
  var D={
-  assistente:{edital:'Concurso Público nº 001/2026',edital2:'Edital de Abertura nº 001/2026 – PMPE',orgao:'PMPE - Polícia Militar de Pernambuco',desc:'Secretaria de Administração e Secretaria de Defesa Social de Pernambuco',vagas:'70 Oficial · 1.250 Soldado',logo:'/idcap/img/pmpe-logo.jpg',page:'/pmpe.html'},
-  analista:{edital:'Concurso Público nº 002/2026',edital2:'Edital de Abertura nº 002/2026 – CBMPE',orgao:'CBMPE - Corpo de Bombeiros Militar de Pernambuco',desc:'Secretaria de Administração e Secretaria de Defesa Social de Pernambuco',vagas:'60 Oficial · 510 Soldado',logo:'/idcap/img/cbmpe-logo.jpg',page:'/cbmpe.html'}
+  pmpe:{edital:'Concurso Público nº 001/2026',edital2:'Edital de Abertura nº 001/2026 – PMPE',orgao:'PMPE - Polícia Militar de Pernambuco',desc:'Secretaria de Administração e Secretaria de Defesa Social de Pernambuco',vagas:'70 Oficial · 1.250 Soldado',logo:'/idcap/img/pmpe-logo.jpg',page:'/pmpe.html'},
+  cbmpe:{edital:'Concurso Público nº 002/2026',edital2:'Edital de Abertura nº 002/2026 – CBMPE',orgao:'CBMPE - Corpo de Bombeiros Militar de Pernambuco',desc:'Secretaria de Administração e Secretaria de Defesa Social de Pernambuco',vagas:'60 Oficial · 510 Soldado',logo:'/idcap/img/cbmpe-logo.jpg',page:'/cbmpe.html'}
  };
- var k=(window.SEAD_CONCURSO&&D[SEAD_CONCURSO.key])?SEAD_CONCURSO.key:'assistente', d=D[k];
+ var k=(window.SEAD_CONCURSO&&D[SEAD_CONCURSO.key])?SEAD_CONCURSO.key:'pmpe', d=D[k];
  document.getElementById('t-edital').textContent=d.edital;
  document.getElementById('t-edital2').textContent=d.edital2;
  document.getElementById('t-orgao').textContent=d.orgao;
