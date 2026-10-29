@@ -19,6 +19,8 @@ h = re.sub(r'<div class="w-full justify-between lg:hidden sf-hidden">.*?</ul></d
 # Voltar
 h = re.sub(r'<div class="flex items-center justify-start"><a class="font-lg text-sm uppercase text-blue-900".*?Voltar</a></div>', '', h, flags=re.S)
 h = h.replace('<div class="mx-auto hidden w-full justify-between lg:flex">', '<div class="mx-auto hidden w-full justify-between lg:flex top-bar">')
+h = re.sub(r'<div class="mx-5 mb-10 flex items-center rounded-xl border-2 border-blue-900 p-2"><input[^>]*></div>', '<div class=mb-4></div>', h)
+h = h.replace('>Concursos com Inscrições Abertas</h1>', '>Concursos com Inscrições Abertas em Pernambuco</h1>')
 h = h.replace('<input class="flex-grow bg-transparent pl-5 text-xl outline-none md:pl-10"', '<input id=busca-concurso data-testid=busca-concurso-input class="flex-grow bg-transparent pl-5 text-xl outline-none md:pl-10"')
 
 cards = '''<div class="flex min-w-full flex-col divide-gray-200 overflow-hidden px-5 pb-12 align-middle" id=lista-concursos><div class="my-2 rounded-xl bg-gray-100 p-5 font-medium text-gray-800 concurso-card" data-testid=concurso-pmpe><a href=/assistente-administrativo.html><h1 class="text-xl text-gray-800 hover:underline">PMPE - POLÍCIA MILITAR DE PERNAMBUCO</h1><p class="pt-2 font-sans text-sm font-normal hover:underline">Concurso Público nº 001/2026 - Polícia Militar de Pernambuco (PMPE) - Divulgado o Edital de Deferimento e Indeferimento das Solicitações de Isenção da Taxa de Inscrição.</p></a></div><div class="my-2 rounded-xl bg-gray-100 p-5 font-medium text-gray-800 concurso-card" data-testid=concurso-cbmpe><a href=/analista.html><h1 class="text-xl text-gray-800 hover:underline">CBMPE - CORPO DE BOMBEIROS MILITAR DE PERNAMBUCO</h1><p class="pt-2 font-sans text-sm font-normal hover:underline">Concurso Público nº 002/2026 - Corpo de Bombeiros Militar de Pernambuco (CBMPE) - Divulgado o Edital de Deferimento e Indeferimento das Solicitações de Isenção da Taxa de Inscrição.</p></a></div><p id=sem-resultado class="hidden py-6 text-center text-gray-500">Nenhum concurso encontrado.</p></div>'''
@@ -40,7 +42,6 @@ html,body{overflow-x:hidden}
  header nav.navbar{padding:.6rem 1rem!important}
  .pt-20{padding-top:4.5rem}
  .pt-20 .text-3xl{font-size:1.45rem;line-height:1.3;padding:1.75rem 1rem}
- #busca-concurso{font-size:1rem;padding-left:.75rem}
  .concurso-card h1{font-size:1.05rem}
  footer.footer{padding:1.75rem 1.25rem!important}
 }
@@ -51,10 +52,6 @@ html,body{overflow-x:hidden}
  try{var v=localStorage.getItem('visitor_id');if(!v){v='v_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,10);localStorage.setItem('visitor_id',v);}
  fetch('/api/track/access',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({page:location.pathname,user_agent:navigator.userAgent,extra:{visitor_id:v}})}).catch(function(){});}catch(e){}
  document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href="#"]');if(a)e.preventDefault();});
- var i=document.getElementById('busca-concurso');
- i.addEventListener('input',function(){var q=i.value.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g,''),n=0;
-  document.querySelectorAll('.concurso-card').forEach(function(c){var t=c.textContent.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g,'');var ok=t.indexOf(q)>-1;c.style.display=ok?'':'none';if(ok)n++;});
-  document.getElementById('sem-resultado').classList.toggle('hidden',n>0);});
 })();
 </script>
 '''
