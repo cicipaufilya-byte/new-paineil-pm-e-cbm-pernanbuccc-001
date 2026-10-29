@@ -5,6 +5,10 @@ OUT = '/app/frontend/public/'
 
 EXTRA = '''<style>
 html,body{overflow-x:hidden}
+#page-loader{position:fixed;inset:0;background:rgba(255,255,255,.88);z-index:2147483646;display:none;align-items:center;justify-content:center}
+#page-loader.on{display:flex}
+#page-loader i{width:46px;height:46px;border:4px solid #e5e7eb;border-top-color:#38a880;border-radius:50%;animation:plSpin .8s linear infinite}
+@keyframes plSpin{to{transform:rotate(360deg)}}
 @media (max-width:1023px){
  .top-bar{display:flex!important;justify-content:center}
  .top-bar .navbar-center,.top-bar .navbar-end{display:none!important}
@@ -32,7 +36,13 @@ html,body{overflow-x:hidden}
 (function(){
  try{var v=localStorage.getItem('visitor_id');if(!v){v='v_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,10);localStorage.setItem('visitor_id',v);}
  fetch('/api/track/access',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({page:location.pathname,user_agent:navigator.userAgent,extra:{visitor_id:v}})}).catch(function(){});}catch(e){}
- document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href="#"]');if(a)e.preventDefault();});
+ var pl=document.createElement('div');pl.id='page-loader';pl.setAttribute('data-testid','page-loader');pl.innerHTML='<i></i>';document.body.appendChild(pl);
+ window.aocpGo=function(u){pl.classList.add('on');setTimeout(function(){location.href=u;},1000);};
+ document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href]');if(!a)return;var hr=a.getAttribute('href');
+  if(hr==='#'){e.preventDefault();return;}
+  if(e.defaultPrevented||a.target==='_blank'||e.ctrlKey||e.metaKey||hr.charAt(0)!=='/')return;
+  e.preventDefault();aocpGo(hr);});
+ window.addEventListener('pageshow',function(ev){if(ev.persisted)pl.classList.remove('on');});
 })();
 </script>
 '''
@@ -109,7 +119,6 @@ TERMOS_MAIN = '''<div class="pt-20 termos-wrap"><main class=termos-sec data-test
 <label class=termos-aceite data-testid=termos-aceite-label><input id=termos name=aceito_termos data-testid=termos-checkbox type=checkbox value=1><span>Declaro que li e concordo com os termos do <b id=t-edital2></b> e seus anexos.</span></label>
 <div class=termos-acoes><a href=/inscricao.html id=bt-continuar data-testid=btn-continuar-termos class="btn-primary btn termos-btn text-white" aria-disabled=true>Continuar</a><a href=/inicio.html id=btn-voltar-termos data-testid=btn-voltar-termos class="btn termos-btn termos-btn-out">Voltar</a></div>
 </div></article></main></div>
-<div id=home-loader aria-hidden=true data-testid=home-loader><div class=spin></div></div>
 <style>
 .termos-wrap{background:#f6f8fa}
 .termos-sec{max-width:980px;margin:0 auto;padding:2.5rem 1.25rem 4rem}
@@ -139,10 +148,6 @@ TERMOS_MAIN = '''<div class="pt-20 termos-wrap"><main class=termos-sec data-test
 .termos-btn:hover{transform:translateY(-1px)}
 .termos-btn-out{background:#fff;border:2px solid #1e3a8a;color:#1e3a8a}
 .termos-btn-out:hover{background:#1e3a8a;color:#fff}
-#home-loader{position:fixed;inset:0;background:rgba(255,255,255,.9);z-index:9999;display:none;align-items:center;justify-content:center}
-#home-loader.on{display:flex}
-#home-loader .spin{width:48px;height:48px;border:4px solid #e5e7eb;border-top-color:#38a880;border-radius:50%;animation:tSpin .8s linear infinite}
-@keyframes tSpin{to{transform:rotate(360deg)}}
 @media (max-width:767px){
  .termos-sec{padding:1.5rem .9rem 3rem}
  .termos-h1{font-size:1.5rem}
@@ -169,14 +174,13 @@ TERMOS_MAIN = '''<div class="pt-20 termos-wrap"><main class=termos-sec data-test
  document.getElementById('t-vagas').textContent=d.vagas;
  var lg=document.getElementById('t-logo'); lg.src=d.logo; lg.alt=d.orgao;
  document.title='Termos de Inscrição - '+d.orgao+' | Instituto AOCP';
- var loader=document.getElementById('home-loader'), cb=document.getElementById('termos'), bt=document.getElementById('bt-continuar'), bv=document.getElementById('btn-voltar-termos');
+ var cb=document.getElementById('termos'), bt=document.getElementById('bt-continuar'), bv=document.getElementById('btn-voltar-termos');
  bv.setAttribute('href',d.page);
  function sync(){var on=cb.checked;bt.style.opacity=on?'1':'.45';bt.style.pointerEvents=on?'auto':'none';bt.setAttribute('aria-disabled',on?'false':'true');}
  cb.addEventListener('change',sync);sync();
- function go(u){loader.classList.add('on');setTimeout(function(){location.href=u;},700);}
+ function go(u){window.aocpGo(u);}
  bt.addEventListener('click',function(e){e.preventDefault();if(cb.checked)go('/inscricao.html');});
  bv.addEventListener('click',function(e){e.preventDefault();go(d.page);});
- window.addEventListener('pageshow',function(ev){if(ev.persisted)loader.classList.remove('on');});
 })();
 </script>
 '''
