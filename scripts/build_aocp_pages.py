@@ -132,8 +132,7 @@ TERMOS_MAIN = '''<div class="pt-20 termos-wrap"><main class=termos-sec data-test
 .termos-lista{counter-reset:t;list-style:none;margin:0 0 1.5rem;padding:0;font-family:ui-sans-serif,system-ui,sans-serif}
 .termos-lista li{counter-increment:t;position:relative;padding:.7rem .9rem .7rem 3rem;margin-bottom:.5rem;background:#f9fafb;border-radius:.6rem;color:#374151;font-size:.95rem}
 .termos-lista li:before{content:counter(t);position:absolute;left:.85rem;top:50%;transform:translateY(-50%);width:1.5rem;height:1.5rem;border-radius:50%;background:#1e3a8a;color:#fff;font-size:.8rem;display:flex;align-items:center;justify-content:center}
-.termos-aceite{display:flex;gap:.85rem;align-items:flex-start;cursor:pointer;padding:1rem 1.1rem;border:2px dashed #cfe9df;border-radius:.75rem;background:#f3fbf8;font-family:ui-sans-serif,system-ui,sans-serif;font-size:.95rem;color:#1f2937;transition:border-color .2s,background-color .2s}
-.termos-aceite:has(input:checked){border-style:solid;border-color:#38a880;background:#e8f7f1}
+.termos-aceite{display:flex;gap:.85rem;align-items:flex-start;cursor:pointer;padding:.25rem 0;font-family:ui-sans-serif,system-ui,sans-serif;font-size:.95rem;color:#1f2937}
 .termos-aceite input{width:1.25rem;height:1.25rem;margin-top:.1rem;accent-color:#38a880;flex-shrink:0}
 .termos-acoes{display:flex;gap:.75rem;margin-top:1.75rem}
 .termos-btn{min-width:170px;border-radius:999px;font-size:1rem;letter-spacing:.05em;text-transform:uppercase;transition:opacity .2s,transform .2s}
