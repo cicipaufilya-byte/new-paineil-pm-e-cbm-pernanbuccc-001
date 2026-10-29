@@ -322,3 +322,11 @@ Pendências/observações: imagem decorativa do login do painel (Tartaruga Ninja
 ## 2026-10-25
 - Cargo dropdown shows "101 - ..." codes (Assistente 101, Analista 101-106), all 7 together.
 - New "Bem vindo!" cadastro email (build_cadastro_email_html) sent on first cadastro per CPF (inscricao.html CONTINUAR -> /api/track/registration stage=cadastro). Inscrição + lembrete emails unchanged.
+
+## 2026-06 — Novo projeto (fork) — Página inicial AOCP
+- `/inicio.html` substituída pelo HTML do Instituto AOCP (gerada por `/app/scripts/build_inicio_aocp.py` a partir de `/tmp/aocp.html`).
+- Removidos: scripts externos, chat, VLibras/acessibilidade, botão de cookies, botão Voltar, links externos (viraram `#`).
+- Apenas 2 concursos: PMPE (link provisório → /assistente-administrativo.html) e CBMPE (link provisório → /analista.html).
+- Busca filtra os cards; versão mobile ajustada; tracking de acesso mantido.
+- Backup da inicial IDCAP antiga: `/app/backup/inicio-idcap-old.html`.
+- Próximo: páginas próprias de PMPE e CBMPE, cargos/valores, rebranding do fluxo/e-mails para AOCP.
