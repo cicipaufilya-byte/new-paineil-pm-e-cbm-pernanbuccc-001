@@ -330,3 +330,4 @@ Pendências/observações: imagem decorativa do login do painel (Tartaruga Ninja
 - Busca filtra os cards; versão mobile ajustada; tracking de acesso mantido.
 - Backup da inicial IDCAP antiga: `/app/backup/inicio-idcap-old.html`.
 - Próximo: páginas próprias de PMPE e CBMPE, cargos/valores, rebranding do fluxo/e-mails para AOCP.
+- 2026-06: Página do concurso PMPE criada em `/pmpe.html` (fonte: `/app/scripts/aocp_src/pmpe_src.html`; gerador: `/app/scripts/build_aocp_pages.py` gera inicio.html e pmpe.html). Página antiga `assistente-administrativo.html` foi para `/app/backup/`. O link "Formulário de Solicitação de Inscrição" leva para `/termos.html?c=assistente` (o fluxo ainda usa os cargos da SEAD), e "Consultar Número e Situação da Inscrição" leva para `/minhas-inscricoes.html`. `concurso.js` com pagina='/pmpe.html'.

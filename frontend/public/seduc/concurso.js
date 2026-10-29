@@ -5,7 +5,7 @@
       nivel: 'Nível Médio',
       cargos: [{v: '1', n: '101', t: 'Assistente Administrativo', p: '90.00'}],
       cidades: [['MACAPA/AP', 'MACAPÁ/AP'], ['SANTANA/AP', 'SANTANA/AP']],
-      pagina: '/assistente-administrativo.html'
+      pagina: '/pmpe.html'
     },
     analista: {
       nome: 'Analista',
